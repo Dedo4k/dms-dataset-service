@@ -15,29 +15,46 @@
 
 package dev.vlxd.datasetservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity(name = "record")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Record {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(name = "record_name", nullable = false)
+    private String name;
+
     @ManyToOne
     @JoinColumn(name = "dataset_id", referencedColumnName = "id", nullable = false)
     private Dataset dataset;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "record")
-    private Set<DataFile> files;
+    private Set<DataFile> files = new HashSet<>();
+
+    public Record() {
+    }
+
+    public Record(String name, Dataset dataset) {
+        this.name = name;
+        this.dataset = dataset;
+    }
+
+    public void addDataFile(DataFile dataFile) {
+        this.files.add(dataFile);
+    }
 }

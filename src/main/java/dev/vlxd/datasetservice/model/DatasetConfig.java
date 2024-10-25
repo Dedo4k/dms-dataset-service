@@ -15,6 +15,8 @@
 
 package dev.vlxd.datasetservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import lombok.ToString;
 @ToString
 @RequiredArgsConstructor
 @Entity(name = "dataset_config")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DatasetConfig {
 
     @Id

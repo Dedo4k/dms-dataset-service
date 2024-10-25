@@ -15,20 +15,34 @@
 
 package dev.vlxd.datasetservice.controller;
 
+import dev.vlxd.datasetservice.constant.PermissionType;
+import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.Record;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @RestController
 @RequestMapping("/v1/datasets")
 public class DatasetController {
 
     @GetMapping(value = "/list")
-    public ResponseEntity<List<Dataset>> listDatasets(@RequestHeader("X-USER-ID") long userId,
+    public ResponseEntity<List<Dataset>> listDatasets(@RequestHeader("X-User-Id") long userId,
                                                       Pageable pageable) {
         return ResponseEntity.ok(Collections.emptyList());
     }
@@ -53,9 +67,56 @@ public class DatasetController {
         return ResponseEntity.ok(null);
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<Object> uploadDataset() {
-        return ResponseEntity.ok(null);
+    @PostMapping(value = "/upload", consumes = {"application/zip"})
+    public ResponseEntity<Dataset> uploadDataset(HttpServletRequest request,
+                                                @RequestHeader(value = "X-Dataset-Name", required = false) String datasetName,
+                                                @RequestHeader("X-User-Id") long userId) {
+        try (InputStream is = request.getInputStream(); ZipInputStream zis = new ZipInputStream(is)) {
+            Dataset dataset = new Dataset();
+            dataset.setOwnerId(userId);
+            dataset.setCreationDate(Instant.now());
+            dataset.setModificationDate(Instant.now());
+            dataset.setPermissions(
+                    Arrays.stream(PermissionType.values())
+                            .map(type -> new Permission(type, dataset, Collections.singletonList(userId)))
+                            .collect(Collectors.toSet()));
+
+            ZipEntry entry = zis.getNextEntry();
+
+            if (!ObjectUtils.isEmpty(datasetName)) {
+                dataset.setName(datasetName);
+            } else {
+                if (entry != null) {
+                    dataset.setName(entry.getName());
+                } else {
+                    throw new RuntimeException("Can not resolve dataset recordName");
+                }
+            }
+
+            String recordName;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (!entry.isDirectory()) {
+                    String fileName = entry.getName();
+                    recordName = fileName.replaceAll(".xml|.json|.jpg|.png|.jpeg", "");
+
+                    Record record = dataset.getRecords().get(recordName);
+
+                    if (record == null) {
+                         record = new Record(recordName, dataset);
+                         dataset.getRecords().put(recordName, record);
+                    }
+
+                    DataFile dataFile = new DataFile(fileName, record);
+                    record.addDataFile(dataFile);
+                }
+            }
+
+            return ResponseEntity.ok(dataset);
+        } catch (IOException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        }
     }
 
     @PostMapping("/{id}/download")

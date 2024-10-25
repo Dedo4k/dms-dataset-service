@@ -15,6 +15,8 @@
 
 package dev.vlxd.datasetservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -29,19 +34,20 @@ import java.util.Set;
 @ToString
 @RequiredArgsConstructor
 @Entity(name = "dataset")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Dataset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(name = "dataset_name", nullable = false)
     private String name;
 
     private String description;
 
     @Column(name = "owner_id", nullable = false)
-    private int ownerId;
+    private long ownerId;
 
     @Column(name = "created_at", nullable = false)
     private Instant creationDate;
@@ -50,12 +56,13 @@ public class Dataset {
     private Instant modificationDate;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "config_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "config_id", referencedColumnName = "id")
     private DatasetConfig config;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-    private Set<Permission> permissions;
+    private Set<Permission> permissions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-    private Set<Record> records;
+    @MapKey(name = "record_name")
+    private Map<String, Record> records = new HashMap<>();
 }

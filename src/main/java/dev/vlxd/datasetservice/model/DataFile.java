@@ -15,9 +15,10 @@
 
 package dev.vlxd.datasetservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -26,8 +27,8 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity(name = "data_file")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DataFile {
 
     @Id
@@ -36,6 +37,9 @@ public class DataFile {
 
     @Column(name = "file_id", nullable = false)
     private String fileId;
+
+    @Column(name = "file_name", nullable = false)
+    private String fileName;
 
     @Column(name = "created_at", nullable = false)
     private Instant creationDate;
@@ -46,4 +50,12 @@ public class DataFile {
     @ManyToOne
     @JoinColumn(name = "record_id", referencedColumnName = "id", nullable = false)
     private Record record;
+
+    public DataFile() {
+    }
+
+    public DataFile(String fileName, Record record) {
+        this.fileName = fileName;
+        this.record = record;
+    }
 }
