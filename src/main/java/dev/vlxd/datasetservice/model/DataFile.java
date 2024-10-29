@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -27,6 +28,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 @Entity(name = "data_file")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DataFile {
@@ -48,14 +50,11 @@ public class DataFile {
     private Instant modificationDate;
 
     @ManyToOne
-    @JoinColumn(name = "record_id", referencedColumnName = "id", nullable = false)
-    private Record record;
+    @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
+    private DataGroup dataGroup;
 
-    public DataFile() {
-    }
-
-    public DataFile(String fileName, Record record) {
+    public DataFile(String fileName, DataGroup dataGroup) {
         this.fileName = fileName;
-        this.record = record;
+        this.dataGroup = dataGroup;
     }
 }

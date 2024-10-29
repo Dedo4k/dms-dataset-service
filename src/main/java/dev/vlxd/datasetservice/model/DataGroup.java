@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -28,28 +29,26 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@Entity(name = "record")
+@RequiredArgsConstructor
+@Entity(name = "data_group")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-public class Record {
+public class DataGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "record_name", nullable = false)
+    @Column(name = "group_name", nullable = false)
     private String name;
 
     @ManyToOne
     @JoinColumn(name = "dataset_id", referencedColumnName = "id", nullable = false)
     private Dataset dataset;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "record")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataGroup")
     private Set<DataFile> files = new HashSet<>();
 
-    public Record() {
-    }
-
-    public Record(String name, Dataset dataset) {
+    public DataGroup(String name, Dataset dataset) {
         this.name = name;
         this.dataset = dataset;
     }

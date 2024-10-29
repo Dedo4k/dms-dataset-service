@@ -63,6 +63,6 @@ public class Dataset {
     private Set<Permission> permissions = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-    @MapKey(name = "record_name")
-    private Map<String, Record> records = new HashMap<>();
+    @MapKey(name = "name")
+    private Map<String, DataGroup> dataGroups = new HashMap<>();
 }

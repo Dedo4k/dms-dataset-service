@@ -15,31 +15,34 @@
 
 package dev.vlxd.datasetservice.controller;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
-import dev.vlxd.datasetservice.model.DataFile;
+import dev.vlxd.datasetservice.constant.ArchiveType;
+import dev.vlxd.datasetservice.exception.UnsupportedArchiveTypeException;
 import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.Permission;
-import dev.vlxd.datasetservice.model.Record;
+import dev.vlxd.datasetservice.model.dto.DatasetUploadedDto;
+import dev.vlxd.datasetservice.model.mapper.DatasetMapper;
+import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @RestController
 @RequestMapping("/v1/datasets")
 public class DatasetController {
+
+    private final IDatasetService datasetService;
+
+    @Autowired
+    public DatasetController(IDatasetService datasetService) {
+        this.datasetService = datasetService;
+    }
 
     @GetMapping(value = "/list")
     public ResponseEntity<List<Dataset>> listDatasets(@RequestHeader("X-User-Id") long userId,
@@ -68,54 +71,17 @@ public class DatasetController {
     }
 
     @PostMapping(value = "/upload", consumes = {"application/zip"})
-    public ResponseEntity<Dataset> uploadDataset(HttpServletRequest request,
-                                                @RequestHeader(value = "X-Dataset-Name", required = false) String datasetName,
-                                                @RequestHeader("X-User-Id") long userId) {
-        try (InputStream is = request.getInputStream(); ZipInputStream zis = new ZipInputStream(is)) {
-            Dataset dataset = new Dataset();
-            dataset.setOwnerId(userId);
-            dataset.setCreationDate(Instant.now());
-            dataset.setModificationDate(Instant.now());
-            dataset.setPermissions(
-                    Arrays.stream(PermissionType.values())
-                            .map(type -> new Permission(type, dataset, Collections.singletonList(userId)))
-                            .collect(Collectors.toSet()));
-
-            ZipEntry entry = zis.getNextEntry();
-
-            if (!ObjectUtils.isEmpty(datasetName)) {
-                dataset.setName(datasetName);
-            } else {
-                if (entry != null) {
-                    dataset.setName(entry.getName());
-                } else {
-                    throw new RuntimeException("Can not resolve dataset recordName");
-                }
-            }
-
-            String recordName;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.isDirectory()) {
-                    String fileName = entry.getName();
-                    recordName = fileName.replaceAll(".xml|.json|.jpg|.png|.jpeg", "");
-
-                    Record record = dataset.getRecords().get(recordName);
-
-                    if (record == null) {
-                         record = new Record(recordName, dataset);
-                         dataset.getRecords().put(recordName, record);
-                    }
-
-                    DataFile dataFile = new DataFile(fileName, record);
-                    record.addDataFile(dataFile);
-                }
-            }
-
-            return ResponseEntity.ok(dataset);
-        } catch (IOException ex) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+    public ResponseEntity<DatasetUploadedDto> uploadDataset(HttpServletRequest request,
+                                                            @RequestHeader(value = "X-Dataset-Name") String datasetName,
+                                                            @RequestHeader("X-User-Id") long userId) {
+        try (InputStream inputStream = request.getInputStream()) {
+            ArchiveType archiveType = ArchiveType.valueOfType(request.getContentType());
+            Dataset dataset = datasetService.uploadDataset(archiveType, inputStream, datasetName, userId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetMapper.toDto(dataset));
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedArchiveTypeException();
+        } catch (IOException e) {
+            throw new RuntimeException("Error with processing request input stream", e);
         }
     }
 

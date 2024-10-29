@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import dev.vlxd.datasetservice.constant.PermissionType;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -29,6 +30,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 @Entity(name = "permission")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Permission {
@@ -49,9 +51,6 @@ public class Permission {
     @CollectionTable(name = "user_permission", joinColumns = @JoinColumn(name = "permission_id"))
     @Column(name = "user_id", nullable = false)
     private List<Long> userIds = new ArrayList<>();
-
-    public Permission() {
-    }
 
     public Permission(PermissionType type, Dataset dataset, List<Long> userIds) {
         this.type = type;
