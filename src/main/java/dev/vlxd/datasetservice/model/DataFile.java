@@ -53,8 +53,11 @@ public class DataFile {
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
     private DataGroup dataGroup;
 
-    public DataFile(String fileName, DataGroup dataGroup) {
+    public DataFile(String fileId, String fileName, Instant creationDate, Instant modificationDate, DataGroup dataGroup) {
+        this.fileId = fileId;
         this.fileName = fileName;
         this.dataGroup = dataGroup;
+        this.creationDate = creationDate;
+        this.modificationDate = modificationDate;
     }
 }

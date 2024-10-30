@@ -35,6 +35,6 @@ public enum ArchiveType {
         return Arrays.stream(values())
                 .filter(value -> value.contentType.equals(contentType))
                 .findFirst()
-                .orElseThrow(UnsupportedArchiveTypeException::new);
+                .orElseThrow(() -> new UnsupportedArchiveTypeException("Unsupported archive type"));
     }
 }

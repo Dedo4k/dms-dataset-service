@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2024 Uladzislau Lailo.
+  ~
+  ~ All rights reserved.
+  ~
+  ~ This source code, and any associated documentation, is the intellectual property of Uladzislau Lailo.
+  ~ Unauthorized copying, modification, distribution, or any form of reuse of this code, in whole or in part,
+  ~ without explicit permission from the copyright holder is strictly prohibited, except where explicitly permitted
+  ~ under applicable open-source licenses (if any).
+  ~
+  ~ Licensed use:
+  ~ If the code is provided under an open-source license, you must follow the terms of that license, which can be found in the LICENSE file.
+  ~ For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.4</version>
+        <version>3.3.5</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.vlxd</groupId>

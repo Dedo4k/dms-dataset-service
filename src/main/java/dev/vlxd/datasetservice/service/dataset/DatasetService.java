@@ -47,7 +47,7 @@ public class DatasetService implements IDatasetService {
     public Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId) {
 
         if (datasetRepository.existsByName(datasetName)) {
-            throw new DatasetNameIsTakenException();
+            throw new DatasetNameIsTakenException("Dataset name is taken");
         }
 
         Dataset dataset = archiveService.extractDataset(archiveType, inputStream);

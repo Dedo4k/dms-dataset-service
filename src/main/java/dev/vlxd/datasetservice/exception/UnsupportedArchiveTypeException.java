@@ -17,11 +17,11 @@ package dev.vlxd.datasetservice.exception;
 
 public class UnsupportedArchiveTypeException extends RuntimeException {
 
-    public UnsupportedArchiveTypeException() {
-        super("Unsupported archive type");
-    }
-
     public UnsupportedArchiveTypeException(String message) {
         super(message);
+    }
+
+    public UnsupportedArchiveTypeException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

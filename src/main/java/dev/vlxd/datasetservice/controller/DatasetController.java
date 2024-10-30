@@ -16,7 +16,6 @@
 package dev.vlxd.datasetservice.controller;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.exception.UnsupportedArchiveTypeException;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetUploadedDto;
 import dev.vlxd.datasetservice.model.mapper.DatasetMapper;
@@ -78,10 +77,8 @@ public class DatasetController {
             ArchiveType archiveType = ArchiveType.valueOfType(request.getContentType());
             Dataset dataset = datasetService.uploadDataset(archiveType, inputStream, datasetName, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(DatasetMapper.toDto(dataset));
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedArchiveTypeException();
         } catch (IOException e) {
-            throw new RuntimeException("Error with processing request input stream", e);
+            throw new RuntimeException("Failed to process request input stream", e);
         }
     }
 

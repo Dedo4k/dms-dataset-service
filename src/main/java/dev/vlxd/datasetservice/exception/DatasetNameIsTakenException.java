@@ -17,11 +17,11 @@ package dev.vlxd.datasetservice.exception;
 
 public class DatasetNameIsTakenException extends RuntimeException {
 
-    public DatasetNameIsTakenException() {
-        super("Dataset name is taken");
-    }
-
     public DatasetNameIsTakenException(String message) {
         super(message);
+    }
+
+    public DatasetNameIsTakenException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
