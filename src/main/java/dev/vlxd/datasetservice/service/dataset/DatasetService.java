@@ -46,11 +46,11 @@ public class DatasetService implements IDatasetService {
     @Override
     public Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId) {
 
-        if (datasetRepository.existsByName(datasetName)) {
+        if (datasetRepository.existsByNameAndOwnerId(datasetName, userId)) {
             throw new DatasetNameIsTakenException("Dataset name is taken");
         }
 
-        Dataset dataset = archiveService.extractDataset(archiveType, inputStream);
+        Dataset dataset = archiveService.extractAndUpload(archiveType, inputStream, datasetName, userId);
 
         dataset.setName(datasetName);
         dataset.setOwnerId(userId);

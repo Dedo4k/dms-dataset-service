@@ -16,12 +16,17 @@
 package dev.vlxd.datasetservice.service.archive;
 
 import dev.vlxd.datasetservice.model.Dataset;
+import org.springframework.http.ResponseEntity;
 
 import java.io.InputStream;
 
-public interface IArchiveService {
+public interface IArchiveUploaderService {
 
-    Dataset extractDataset(InputStream inputStream);
+    Dataset extractAndUpload(InputStream inputStream, String datasetName, long userId);
 
-    InputStream archiveDataset(Dataset dataset);
+    InputStream archiveAndDownload(Dataset dataset);
+
+    ResponseEntity<String> upload(InputStream is, String filename);
+
+    InputStream download();
 }

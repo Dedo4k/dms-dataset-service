@@ -22,5 +22,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DatasetRepository extends JpaRepository<Dataset, Long> {
 
-    boolean existsByName(String datasetName);
+    boolean existsByNameAndOwnerId(String datasetName, long ownerId);
 }

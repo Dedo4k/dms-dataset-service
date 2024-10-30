@@ -18,6 +18,7 @@ package dev.vlxd.datasetservice.service.archive;
 import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.model.Dataset;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,27 +27,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
-public class ZipArchiveService implements IArchiveService {
+public class ZipArchiveUploaderService implements IArchiveUploaderService {
+
+    private final String storageServiceUrl;
+
+    public ZipArchiveUploaderService(@Value("${storage.service.url}") String storageServiceUrl) {
+        this.storageServiceUrl = storageServiceUrl;
+    }
 
     @Override
-    public Dataset extractDataset(InputStream inputStream) {
-        try (ZipInputStream zis = new ZipInputStream(inputStream)) {
-            Dataset dataset = new Dataset();
+    public Dataset extractAndUpload(InputStream inputStream, String datasetName, long userId) {
+        NonClosableZipInputStream zis = new NonClosableZipInputStream(inputStream);
 
+        Dataset dataset = new Dataset();
+
+        try {
             ZipEntry entry;
-
             while ((entry = zis.getNextEntry()) != null) {
                 if (!entry.isDirectory()) {
                     String fileName = entry.getName();
                     String groupName = fileName.replaceAll(".xml|.json|.jpg|.png|.jpeg", "");
+                    String storingName = String.join("/",  String.valueOf(userId), datasetName, fileName);
 
                     DataGroup dataGroup = dataset.getDataGroups().get(groupName);
 
@@ -55,23 +62,7 @@ public class ZipArchiveService implements IArchiveService {
                         dataset.getDataGroups().put(groupName, dataGroup);
                     }
 
-                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                    byte[] data = new byte[32 * 1024];
-                    int len;
-
-                    while ((len = zis.read(data)) != -1) {
-                        buffer.write(data, 0, len);
-                    }
-
-                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(buffer.toByteArray());
-
-                    RestTemplate restTemplate = new RestTemplate();
-                    HttpHeaders httpHeaders = new HttpHeaders();
-                    httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                    httpHeaders.set("X-Filename", fileName);
-                    InputStreamResource inputStreamResource = new InputStreamResource(byteArrayInputStream);
-                    HttpEntity<InputStreamResource> httpEntity = new HttpEntity<>(inputStreamResource, httpHeaders);
-                    ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:9002/v1/storage/upload", httpEntity, String.class);
+                    ResponseEntity<String> response = upload(zis, storingName);
 
                     DataFile dataFile = new DataFile(
                             response.getBody(),
@@ -84,14 +75,51 @@ public class ZipArchiveService implements IArchiveService {
                 }
             }
 
-            return dataset;
+            zis.forceClose();
         } catch (IOException e) {
-            throw new RuntimeException("Error with processing ZIP archive", e);
+            throw new RuntimeException("Failed to process ZIP archive", e);
         }
+
+        return dataset;
     }
 
     @Override
-    public InputStream archiveDataset(Dataset dataset) {
+    public InputStream archiveAndDownload(Dataset dataset) {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<String> upload(InputStream is, String filename) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.set("X-Filename", filename);
+
+        InputStreamResource inputStreamResource = new InputStreamResource(is);
+        HttpEntity<InputStreamResource> httpEntity = new HttpEntity<>(inputStreamResource, httpHeaders);
+
+        return restTemplate.postForEntity(storageServiceUrl, httpEntity, String.class);
+    }
+
+    @Override
+    public InputStream download() {
+        return null;
+    }
+
+    protected static class NonClosableZipInputStream extends ZipInputStream {
+
+        public NonClosableZipInputStream(InputStream in) {
+            super(in);
+        }
+
+        @Override
+        public void close() {
+            // close() is disabled due to RestTemplate closes stream after finishes the request
+        }
+
+        public void forceClose() throws IOException {
+            super.close();
+        }
     }
 }
