@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: dms-dataset-db
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d dms_dataset" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dms_dataset
+#    volumes:
+#      - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: "4gb"
