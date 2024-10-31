@@ -23,6 +23,8 @@ import dev.vlxd.datasetservice.model.Permission;
 import dev.vlxd.datasetservice.repository.DatasetRepository;
 import dev.vlxd.datasetservice.service.archive.ArchiveManagerService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -41,6 +43,16 @@ public class DatasetService implements IDatasetService {
     public DatasetService(ArchiveManagerService archiveService, DatasetRepository datasetRepository) {
         this.archiveService = archiveService;
         this.datasetRepository = datasetRepository;
+    }
+
+    @Override
+    public Page<Dataset> listDatasets(long userId, Pageable pageable) {
+        return datasetRepository.findDatasetsByUserPermissions(userId, PermissionType.READ, pageable);
+    }
+
+    @Override
+    public Dataset findById(long id) {
+        return datasetRepository.findById(id).orElse(null);
     }
 
     @Override

@@ -17,12 +17,10 @@ package dev.vlxd.datasetservice.model.dto;
 
 import java.time.Instant;
 
-public class DatasetUploadedDto {
+public class DatasetDto {
     public long id;
     public String name;
     public long ownerId;
     public Instant creationDate;
     public Instant modificationDate;
-    public long groups;
-    public long files;
 }

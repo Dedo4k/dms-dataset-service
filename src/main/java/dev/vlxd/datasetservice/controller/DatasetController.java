@@ -17,20 +17,23 @@ package dev.vlxd.datasetservice.controller;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUploadedDto;
+import dev.vlxd.datasetservice.model.dto.DatasetDto;
+import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
 import dev.vlxd.datasetservice.model.mapper.DatasetMapper;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/datasets")
@@ -44,9 +47,12 @@ public class DatasetController {
     }
 
     @GetMapping(value = "/list")
-    public ResponseEntity<List<Dataset>> listDatasets(@RequestHeader("X-User-Id") long userId,
-                                                      Pageable pageable) {
-        return ResponseEntity.ok(Collections.emptyList());
+    public ResponseEntity<PagedModel<EntityModel<DatasetDto>>> listDatasets(@RequestHeader("X-User-Id") long userId,
+                                                                            PagedResourcesAssembler<DatasetDto> assembler,
+                                                                            Pageable pageable) {
+        Page<Dataset> datasets = datasetService.listDatasets(userId, pageable);
+
+        return ResponseEntity.ok(assembler.toModel(datasets.map(DatasetMapper::toDto)));
     }
 
     @PostMapping("/new")
@@ -55,8 +61,9 @@ public class DatasetController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Dataset> getDataset(@PathVariable String id) {
-        return ResponseEntity.ok(null);
+    public ResponseEntity<DatasetDto> getDataset(@PathVariable long id) {
+        Dataset dataset = datasetService.findById(id);
+        return ResponseEntity.ok(DatasetMapper.toDto(dataset));
     }
 
     @PostMapping("/{id}")
@@ -70,13 +77,13 @@ public class DatasetController {
     }
 
     @PostMapping(value = "/upload", consumes = {"application/zip"})
-    public ResponseEntity<DatasetUploadedDto> uploadDataset(HttpServletRequest request,
-                                                            @RequestHeader(value = "X-Dataset-Name") String datasetName,
-                                                            @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetUploadDto> uploadDataset(HttpServletRequest request,
+                                                          @RequestHeader(value = "X-Dataset-Name") String datasetName,
+                                                          @RequestHeader("X-User-Id") long userId) {
         try (InputStream inputStream = request.getInputStream()) {
             ArchiveType archiveType = ArchiveType.valueOfType(request.getContentType());
             Dataset dataset = datasetService.uploadDataset(archiveType, inputStream, datasetName, userId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetMapper.toDto(dataset));
+            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetMapper.toUploadDto(dataset));
         } catch (IOException e) {
             throw new RuntimeException("Failed to process request input stream", e);
         }
