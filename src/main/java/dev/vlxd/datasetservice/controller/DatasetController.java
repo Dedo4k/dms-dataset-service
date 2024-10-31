@@ -17,16 +17,15 @@ package dev.vlxd.datasetservice.controller;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.assembler.DatasetAssemblerService;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
-import dev.vlxd.datasetservice.model.mapper.DatasetMapper;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,19 +39,20 @@ import java.io.InputStream;
 public class DatasetController {
 
     private final IDatasetService datasetService;
+    private final DatasetAssemblerService datasetAssembler;
 
     @Autowired
-    public DatasetController(IDatasetService datasetService) {
+    public DatasetController(IDatasetService datasetService, DatasetAssemblerService datasetAssembler) {
         this.datasetService = datasetService;
+        this.datasetAssembler = datasetAssembler;
     }
 
     @GetMapping(value = "/list")
-    public ResponseEntity<PagedModel<EntityModel<DatasetDto>>> listDatasets(@RequestHeader("X-User-Id") long userId,
-                                                                            PagedResourcesAssembler<DatasetDto> assembler,
-                                                                            Pageable pageable) {
+    public ResponseEntity<PagedModel<DatasetDto>> listDatasets(@RequestHeader("X-User-Id") long userId,
+                                                               @PageableDefault Pageable pageable) {
         Page<Dataset> datasets = datasetService.listDatasets(userId, pageable);
 
-        return ResponseEntity.ok(assembler.toModel(datasets.map(DatasetMapper::toDto)));
+        return ResponseEntity.ok(datasetAssembler.toPagedModel(datasets));
     }
 
     @PostMapping("/new")
@@ -63,7 +63,7 @@ public class DatasetController {
     @GetMapping("/{id}")
     public ResponseEntity<DatasetDto> getDataset(@PathVariable long id) {
         Dataset dataset = datasetService.findById(id);
-        return ResponseEntity.ok(DatasetMapper.toDto(dataset));
+        return ResponseEntity.ok(datasetAssembler.toModal(dataset));
     }
 
     @PostMapping("/{id}")
@@ -83,7 +83,7 @@ public class DatasetController {
         try (InputStream inputStream = request.getInputStream()) {
             ArchiveType archiveType = ArchiveType.valueOfType(request.getContentType());
             Dataset dataset = datasetService.uploadDataset(archiveType, inputStream, datasetName, userId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(DatasetMapper.toUploadDto(dataset));
+            return ResponseEntity.status(HttpStatus.CREATED).body(datasetAssembler.toUploadModel(dataset));
         } catch (IOException e) {
             throw new RuntimeException("Failed to process request input stream", e);
         }
