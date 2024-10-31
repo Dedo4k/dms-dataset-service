@@ -24,13 +24,7 @@ import java.util.stream.IntStream;
 public class DatasetMapper {
 
     public static DatasetDto toDto(Dataset dataset) {
-        DatasetDto dto = new DatasetDto();
-        dto.id = dataset.getId();
-        dto.name = dataset.getName();
-        dto.creationDate = dataset.getCreationDate();
-        dto.modificationDate = dataset.getModificationDate();
-        dto.ownerId = dataset.getOwnerId();
-        return dto;
+        return new DatasetDto(dataset);
     }
 
     public static DatasetUploadDto toUploadDto(Dataset dataset) {

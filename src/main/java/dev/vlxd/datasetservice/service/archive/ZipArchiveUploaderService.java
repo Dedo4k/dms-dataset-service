@@ -53,7 +53,7 @@ public class ZipArchiveUploaderService implements IArchiveUploaderService {
                 if (!entry.isDirectory()) {
                     String fileName = entry.getName();
                     String groupName = fileName.replaceAll(".xml|.json|.jpg|.png|.jpeg", "");
-                    String storingName = String.join("/",  String.valueOf(userId), datasetName, fileName);
+                    String storingName = String.join("/", String.valueOf(userId), datasetName, fileName);
 
                     DataGroup dataGroup = dataset.getDataGroups().get(groupName);
 
