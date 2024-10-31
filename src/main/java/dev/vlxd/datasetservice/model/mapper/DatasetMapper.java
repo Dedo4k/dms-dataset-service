@@ -16,14 +16,25 @@
 package dev.vlxd.datasetservice.model.mapper;
 
 import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUploadedDto;
+import dev.vlxd.datasetservice.model.dto.DatasetDto;
+import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
 
 import java.util.stream.IntStream;
 
 public class DatasetMapper {
 
-    public static DatasetUploadedDto toDto(Dataset dataset) {
-        DatasetUploadedDto dto = new DatasetUploadedDto();
+    public static DatasetDto toDto(Dataset dataset) {
+        DatasetDto dto = new DatasetDto();
+        dto.id = dataset.getId();
+        dto.name = dataset.getName();
+        dto.creationDate = dataset.getCreationDate();
+        dto.modificationDate = dataset.getModificationDate();
+        dto.ownerId = dataset.getOwnerId();
+        return dto;
+    }
+
+    public static DatasetUploadDto toUploadDto(Dataset dataset) {
+        DatasetUploadDto dto = new DatasetUploadDto();
         dto.id = dataset.getId();
         dto.name = dataset.getName();
         dto.creationDate = dataset.getCreationDate();

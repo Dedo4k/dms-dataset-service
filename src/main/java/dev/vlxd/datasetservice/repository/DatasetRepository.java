@@ -15,12 +15,23 @@
 
 package dev.vlxd.datasetservice.repository;
 
+import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.model.Dataset;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DatasetRepository extends JpaRepository<Dataset, Long> {
 
     boolean existsByNameAndOwnerId(String datasetName, long ownerId);
+
+    @Query("SELECT d " +
+            "FROM dataset d " +
+            "JOIN permission p ON d.id = p.dataset.id " +
+            "WHERE :userId MEMBER OF p.userIds " +
+            "AND p.type = :permissionType")
+    Page<Dataset> findDatasetsByUserPermissions(long userId, PermissionType permissionType, Pageable pageable);
 }
