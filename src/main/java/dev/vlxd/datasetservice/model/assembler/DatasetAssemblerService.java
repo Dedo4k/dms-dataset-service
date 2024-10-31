@@ -17,27 +17,37 @@ package dev.vlxd.datasetservice.model.assembler;
 
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
+import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.web.HateoasPageableHandlerMethodArgumentResolver;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponents;
 
 @Component
-public class PagedDatasetAssembler extends PagedResourcesAssembler<Dataset> {
+public class DatasetAssemblerService {
 
-    private final DatasetAssembler assembler;
+    private final DatasetAssembler datasetAssembler;
+    private final DatasetUploadAssembler uploadAssembler;
+    private final PagedResourcesAssembler<Dataset> pagedAssembler;
 
-    public PagedDatasetAssembler(@Nullable HateoasPageableHandlerMethodArgumentResolver resolver,
-                                 @Nullable UriComponents baseUri,
-                                 DatasetAssembler datasetAssembler) {
-        super(resolver, baseUri);
-        this.assembler = datasetAssembler;
+    @Autowired
+    public DatasetAssemblerService(DatasetAssembler datasetAssembler,
+                                   DatasetUploadAssembler uploadAssembler) {
+        this.datasetAssembler = datasetAssembler;
+        this.uploadAssembler = uploadAssembler;
+        this.pagedAssembler = new PagedResourcesAssembler<>(null, null);
+    }
+
+    public DatasetDto toModal(Dataset dataset) {
+        return datasetAssembler.toModel(dataset);
     }
 
     public PagedModel<DatasetDto> toPagedModel(Page<Dataset> page) {
-        return super.toModel(page, assembler);
+        return pagedAssembler.toModel(page, datasetAssembler);
+    }
+
+    public DatasetUploadDto toUploadModel(Dataset dataset) {
+        return uploadAssembler.toModel(dataset);
     }
 }

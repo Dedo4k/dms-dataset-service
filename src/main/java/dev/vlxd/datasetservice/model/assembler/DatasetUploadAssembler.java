@@ -17,7 +17,7 @@ package dev.vlxd.datasetservice.model.assembler;
 
 import dev.vlxd.datasetservice.controller.DatasetController;
 import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetDto;
+import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -27,23 +27,22 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class DatasetAssembler implements RepresentationModelAssembler<Dataset, DatasetDto> {
+public class DatasetUploadAssembler implements RepresentationModelAssembler<Dataset, DatasetUploadDto> {
 
     @Override
-    public @NonNull DatasetDto toModel(@NonNull Dataset entity) {
-        DatasetDto model = new DatasetDto(entity);
+    public @NonNull DatasetUploadDto toModel(@NonNull Dataset entity) {
+        DatasetUploadDto model = new DatasetUploadDto(entity);
 
         model.add(
-                linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getId()))
-                        .withRel("self")
+                linkTo(methodOn(DatasetController.class).getDataset(entity.getId()))
+                        .withRel("details")
         );
 
         return model;
     }
 
     @Override
-    public @NonNull CollectionModel<DatasetDto> toCollectionModel(@NonNull Iterable<? extends Dataset> entities) {
+    public @NonNull CollectionModel<DatasetUploadDto> toCollectionModel(@NonNull Iterable<? extends Dataset> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }
