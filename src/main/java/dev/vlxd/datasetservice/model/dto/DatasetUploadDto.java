@@ -17,27 +17,23 @@ package dev.vlxd.datasetservice.model.dto;
 
 import dev.vlxd.datasetservice.model.Dataset;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.core.Relation;
 
 import java.time.Instant;
 import java.util.stream.IntStream;
 
-@Relation(collectionRelation = "datasets")
 public class DatasetUploadDto extends RepresentationModel<DatasetUploadDto> {
-    public long id;
+    public Long id;
     public String name;
-    public long ownerId;
+    public Long ownerId;
     public Instant creationDate;
-    public Instant modificationDate;
-    public long groups;
-    public long files;
+    public Integer groups;
+    public Integer files;
 
     public DatasetUploadDto(Dataset entity) {
         id = entity.getId();
-        name = entity.getName();
+        name = entity.getAlias();
         ownerId = entity.getOwnerId();
         creationDate = entity.getCreationDate();
-        modificationDate = entity.getModificationDate();
         groups = entity.getDataGroups().values().size();
         files = entity.getDataGroups().values().stream()
                 .flatMapToInt(dataGroup -> IntStream.of(dataGroup.getFiles().size()))

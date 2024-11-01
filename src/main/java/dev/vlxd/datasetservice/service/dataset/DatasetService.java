@@ -18,8 +18,10 @@ package dev.vlxd.datasetservice.service.dataset;
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DatasetNameIsTakenException;
+import dev.vlxd.datasetservice.exception.DatasetNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.repository.DatasetRepository;
 import dev.vlxd.datasetservice.service.archive.ArchiveManagerService;
 import jakarta.transaction.Transactional;
@@ -47,12 +49,37 @@ public class DatasetService implements IDatasetService {
 
     @Override
     public Page<Dataset> listDatasets(long userId, Pageable pageable) {
-        return datasetRepository.findDatasetsByUserPermissions(userId, PermissionType.READ, pageable);
+        return datasetRepository.findDatasetsByUserPermission(userId, PermissionType.READ, pageable);
     }
 
     @Override
-    public Dataset findById(long id) {
-        return datasetRepository.findById(id).orElse(null);
+    public Dataset findById(long id, long userId) {
+        return datasetRepository.findDatasetByIdAndUserPermission(id, userId, PermissionType.READ)
+                .orElseThrow(() ->
+                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you don't have READ permission", id)));
+    }
+
+    @Override
+    public Dataset findByIdAndOwnerId(long id, long ownerId) {
+        return datasetRepository.findDatasetsByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() ->
+                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", id)));
+    }
+
+    @Override
+    public Dataset update(long id, DatasetUpdateDto dataset, long userId) {
+        Dataset datasetToUpdate = datasetRepository
+                .findDatasetByIdAndUserPermission(id, userId, PermissionType.UPDATE)
+                .orElseThrow(() ->
+                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you don't have READ permission", id)));
+
+        datasetToUpdate.setAlias(dataset.name);
+        datasetToUpdate.setDescription(dataset.description);
+        datasetToUpdate.setModificationDate(Instant.now());
+
+        datasetRepository.save(datasetToUpdate);
+
+        return datasetToUpdate;
     }
 
     @Override
@@ -65,6 +92,7 @@ public class DatasetService implements IDatasetService {
         Dataset dataset = archiveService.extractAndUpload(archiveType, inputStream, datasetName, userId);
 
         dataset.setName(datasetName);
+        dataset.setAlias(datasetName);
         dataset.setOwnerId(userId);
         dataset.setCreationDate(Instant.now());
         dataset.setModificationDate(Instant.now());

@@ -44,6 +44,9 @@ public class Dataset {
     @Column(name = "dataset_name", nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String alias;
+
     private String description;
 
     @Column(name = "owner_id", nullable = false)

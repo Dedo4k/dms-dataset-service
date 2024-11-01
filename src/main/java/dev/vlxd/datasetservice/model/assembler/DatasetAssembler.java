@@ -35,8 +35,14 @@ public class DatasetAssembler implements RepresentationModelAssembler<Dataset, D
 
         model.add(
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getId()))
-                        .withRel("self")
+                        methodOn(DatasetController.class).getDataset(entity.getId(), -1))
+                        .withRel("self"),
+                linkTo(
+                        methodOn(DatasetController.class).getConfig(entity.getId(), -1))
+                        .withRel("config"),
+                linkTo(
+                        methodOn(DatasetController.class).downloadDataset(entity.getId()))
+                        .withRel("download")
         );
 
         return model;

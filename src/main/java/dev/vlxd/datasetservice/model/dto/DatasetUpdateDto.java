@@ -15,27 +15,9 @@
 
 package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.model.Dataset;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.core.Relation;
 
-import java.time.Instant;
-
-@Relation(collectionRelation = "datasets")
-public class DatasetDto extends RepresentationModel<DatasetDto> {
-    public Long id;
+public class DatasetUpdateDto extends RepresentationModel<DatasetUpdateDto> {
     public String name;
     public String description;
-    public Long ownerId;
-    public Instant creationDate;
-    public Instant modificationDate;
-
-    public DatasetDto(Dataset entity) {
-        id = entity.getId();
-        name = entity.getAlias();
-        description = entity.getDescription();
-        ownerId = entity.getOwnerId();
-        creationDate = entity.getCreationDate();
-        modificationDate = entity.getModificationDate();
-    }
 }
