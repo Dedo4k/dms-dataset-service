@@ -16,8 +16,8 @@
 package dev.vlxd.datasetservice.model.assembler;
 
 import dev.vlxd.datasetservice.controller.DatasetController;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
+import dev.vlxd.datasetservice.model.DatasetConfig;
+import dev.vlxd.datasetservice.model.dto.DatasetConfigDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -27,23 +27,26 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class DatasetUploadAssembler implements RepresentationModelAssembler<Dataset, DatasetUploadDto> {
+public class DatasetConfigAssembler implements RepresentationModelAssembler<DatasetConfig, DatasetConfigDto> {
 
     @Override
-    public @NonNull DatasetUploadDto toModel(@NonNull Dataset entity) {
-        DatasetUploadDto model = new DatasetUploadDto(entity);
+    public @NonNull DatasetConfigDto toModel(@NonNull DatasetConfig entity) {
+        DatasetConfigDto model = new DatasetConfigDto(entity);
 
         model.add(
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getId(), -1))
-                        .withRel("details")
+                        methodOn(DatasetController.class).getConfig(entity.getDataset().getId(), -1))
+                        .withRel("self"),
+                linkTo(
+                        methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
+                        .withRel("dataset")
         );
 
         return model;
     }
 
     @Override
-    public @NonNull CollectionModel<DatasetUploadDto> toCollectionModel(@NonNull Iterable<? extends Dataset> entities) {
+    public @NonNull CollectionModel<DatasetConfigDto> toCollectionModel(@NonNull Iterable<? extends DatasetConfig> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

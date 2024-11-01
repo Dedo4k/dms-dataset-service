@@ -15,27 +15,23 @@
 
 package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.DatasetConfig;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.core.Relation;
 
-import java.time.Instant;
+import java.util.List;
 
-@Relation(collectionRelation = "datasets")
-public class DatasetDto extends RepresentationModel<DatasetDto> {
-    public Long id;
-    public String name;
-    public String description;
-    public Long ownerId;
-    public Instant creationDate;
-    public Instant modificationDate;
+public class DatasetConfigDto extends RepresentationModel<DatasetConfigDto> {
+    public long id;
+    public List<String> classes;
+    public boolean useClasses;
+    public List<String> ignoreClasses;
+    public boolean useIgnoreClasses;
 
-    public DatasetDto(Dataset entity) {
+    public DatasetConfigDto(DatasetConfig entity) {
         id = entity.getId();
-        name = entity.getAlias();
-        description = entity.getDescription();
-        ownerId = entity.getOwnerId();
-        creationDate = entity.getCreationDate();
-        modificationDate = entity.getModificationDate();
+        classes = entity.getClasses();
+        useClasses = entity.isUseClasses();
+        ignoreClasses = entity.getIgnoreClasses();
+        useIgnoreClasses = entity.isUseIgnoreClasses();
     }
 }

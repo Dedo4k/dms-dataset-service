@@ -17,9 +17,11 @@ package dev.vlxd.datasetservice.controller;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.DatasetConfig;
 import dev.vlxd.datasetservice.model.assembler.DatasetAssemblerService;
-import dev.vlxd.datasetservice.model.dto.DatasetDto;
-import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
+import dev.vlxd.datasetservice.model.assembler.DatasetConfigAssemblerService;
+import dev.vlxd.datasetservice.model.dto.*;
+import dev.vlxd.datasetservice.service.config.IDatasetConfigService;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +41,18 @@ import java.io.InputStream;
 public class DatasetController {
 
     private final IDatasetService datasetService;
+    private final IDatasetConfigService configService;
     private final DatasetAssemblerService datasetAssembler;
+    private final DatasetConfigAssemblerService configAssembler;
 
     @Autowired
-    public DatasetController(IDatasetService datasetService, DatasetAssemblerService datasetAssembler) {
+    public DatasetController(IDatasetService datasetService,
+                             IDatasetConfigService configService,
+                             DatasetAssemblerService datasetAssembler, DatasetConfigAssemblerService configAssembler) {
         this.datasetService = datasetService;
+        this.configService = configService;
         this.datasetAssembler = datasetAssembler;
+        this.configAssembler = configAssembler;
     }
 
     @GetMapping(value = "/list")
@@ -61,14 +69,20 @@ public class DatasetController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DatasetDto> getDataset(@PathVariable long id) {
-        Dataset dataset = datasetService.findById(id);
+    public ResponseEntity<DatasetDto> getDataset(@PathVariable long id,
+                                                 @RequestHeader("X-User-Id") long userId) {
+        Dataset dataset = datasetService.findById(id, userId);
+
         return ResponseEntity.ok(datasetAssembler.toModal(dataset));
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<Dataset> updateDataset(@PathVariable String id) {
-        return ResponseEntity.ok(null);
+    @PutMapping("/{id}")
+    public ResponseEntity<DatasetDto> updateDataset(@PathVariable long id,
+                                                    @RequestBody DatasetUpdateDto dataset,
+                                                    @RequestHeader("X-User-Id") long userId) {
+        Dataset updated = datasetService.update(id, dataset, userId);
+
+        return ResponseEntity.ok(datasetAssembler.toModal(updated));
     }
 
     @DeleteMapping("/{id}")
@@ -89,8 +103,24 @@ public class DatasetController {
         }
     }
 
+    @GetMapping("/{id}/config")
+    public ResponseEntity<DatasetConfigDto> getConfig(@PathVariable long id, @RequestHeader("X-User-Id") long userId) {
+        DatasetConfig config = configService.getConfig(id, userId);
+
+        return ResponseEntity.ok(configAssembler.toModel(config));
+    }
+
+    @PostMapping("/{id}/config")
+    public ResponseEntity<DatasetConfigDto> createConfig(@PathVariable long id,
+                                                         @RequestBody DatasetConfigCreateDto createDto,
+                                                         @RequestHeader("X-User-Id") long userId) {
+        DatasetConfig config = configService.create(id, createDto, userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(configAssembler.toModel(config));
+    }
+
     @PostMapping("/{id}/download")
-    public ResponseEntity<Object> downloadDataset(@PathVariable String id) {
+    public ResponseEntity<Object> downloadDataset(@PathVariable long id) {
         return ResponseEntity.ok(null);
     }
 }

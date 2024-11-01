@@ -23,15 +23,27 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface DatasetRepository extends JpaRepository<Dataset, Long> {
 
     boolean existsByNameAndOwnerId(String datasetName, long ownerId);
+
+    Optional<Dataset> findDatasetsByIdAndOwnerId(long id, long ownerId);
+
+    @Query("SELECT d " +
+            "FROM dataset d " +
+            "JOIN permission p ON d.id = p.dataset.id " +
+            "WHERE :userId MEMBER OF p.userIds " +
+            "AND :id = p.dataset.id " +
+            "AND p.type = :permissionType")
+    Optional<Dataset> findDatasetByIdAndUserPermission(long id, long userId, PermissionType permissionType);
 
     @Query("SELECT d " +
             "FROM dataset d " +
             "JOIN permission p ON d.id = p.dataset.id " +
             "WHERE :userId MEMBER OF p.userIds " +
             "AND p.type = :permissionType")
-    Page<Dataset> findDatasetsByUserPermissions(long userId, PermissionType permissionType, Pageable pageable);
+    Page<Dataset> findDatasetsByUserPermission(long userId, PermissionType permissionType, Pageable pageable);
 }

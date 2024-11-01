@@ -17,11 +17,14 @@ package dev.vlxd.datasetservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import dev.vlxd.datasetservice.util.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,4 +40,17 @@ public class DatasetConfig {
 
     @OneToOne(mappedBy = "config")
     private Dataset dataset;
+
+    @Convert(converter = StringListConverter.class)
+    private List<String> classes;
+
+    @Column(name = "use_classes")
+    private boolean useClasses;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "ignore_classes")
+    private List<String> ignoreClasses;
+
+    @Column(name = "use_ignore_classes")
+    private boolean useIgnoreClasses;
 }

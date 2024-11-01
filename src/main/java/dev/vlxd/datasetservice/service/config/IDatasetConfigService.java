@@ -13,25 +13,14 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.service.config;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import dev.vlxd.datasetservice.model.DatasetConfig;
+import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
 
-import java.io.InputStream;
+public interface IDatasetConfigService {
 
-public interface IDatasetService {
+    DatasetConfig getConfig(long datasetId, long ownerId);
 
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
-
-    Dataset findById(long id, long userId);
-
-    Dataset findByIdAndOwnerId(long id, long ownerId);
-
-    Dataset update(long id, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+    DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
 }
