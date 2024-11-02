@@ -13,25 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.service.groups;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
+import dev.vlxd.datasetservice.model.DataGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.io.InputStream;
+public interface IDataGroupService {
 
-public interface IDatasetService {
+    DataGroup getGroup(long datasetId, long groupId, long userId);
 
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
-
-    Dataset findById(long datasetId, long userId);
-
-    Dataset findByIdAndOwnerId(long datasetId, long ownerId);
-
-    Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+    Page<DataGroup> listGroups(long datasetId, long userId, Pageable pageable);
 }

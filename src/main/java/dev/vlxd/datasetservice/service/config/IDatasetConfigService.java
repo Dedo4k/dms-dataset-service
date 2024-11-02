@@ -17,10 +17,13 @@ package dev.vlxd.datasetservice.service.config;
 
 import dev.vlxd.datasetservice.model.DatasetConfig;
 import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
+import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
 
 public interface IDatasetConfigService {
 
     DatasetConfig getConfig(long datasetId, long ownerId);
 
     DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
+
+    DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId);
 }

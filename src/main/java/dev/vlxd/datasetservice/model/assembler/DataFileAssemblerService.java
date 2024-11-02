@@ -13,25 +13,24 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.model.assembler;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import dev.vlxd.datasetservice.model.DataFile;
+import dev.vlxd.datasetservice.model.dto.DataFileDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
+@Component
+public class DataFileAssemblerService {
 
-public interface IDatasetService {
+    private final DataFileAssembler dataFileAssembler;
 
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
+    @Autowired
+    public DataFileAssemblerService(DataFileAssembler dataFileAssembler) {
+        this.dataFileAssembler = dataFileAssembler;
+    }
 
-    Dataset findById(long datasetId, long userId);
-
-    Dataset findByIdAndOwnerId(long datasetId, long ownerId);
-
-    Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+    public DataFileDto toModel(DataFile dataFile) {
+        return dataFileAssembler.toModel(dataFile);
+    }
 }
