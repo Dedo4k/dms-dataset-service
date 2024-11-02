@@ -13,25 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.service.files;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import dev.vlxd.datasetservice.model.DataFile;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
-import java.io.InputStream;
+public interface IDataFileService {
 
-public interface IDatasetService {
+    DataFile getDataFile(long datasetId, long groupId, long dataFileId, long userId);
 
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
-
-    Dataset findById(long datasetId, long userId);
-
-    Dataset findByIdAndOwnerId(long datasetId, long ownerId);
-
-    Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+    ResponseEntity<Resource> getResource(long datasetId, long groupId, long dataFileId, long userId);
 }

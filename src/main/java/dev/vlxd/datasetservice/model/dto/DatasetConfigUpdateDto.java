@@ -13,25 +13,14 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.io.InputStream;
-
-public interface IDatasetService {
-
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
-
-    Dataset findById(long datasetId, long userId);
-
-    Dataset findByIdAndOwnerId(long datasetId, long ownerId);
-
-    Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+public class DatasetConfigUpdateDto {
+    public List<String> classes = new ArrayList<>();
+    public boolean useClasses;
+    public List<String> ignoreClasses = new ArrayList<>();
+    public boolean useIgnoreClasses;
 }

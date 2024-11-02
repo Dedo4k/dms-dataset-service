@@ -20,12 +20,15 @@ import dev.vlxd.datasetservice.exception.DatasetConfigNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.DatasetConfig;
 import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
+import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
 import dev.vlxd.datasetservice.repository.DatasetConfigRepository;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+import java.time.Instant;
 
 @Service
 @Transactional
@@ -35,7 +38,8 @@ public class DatasetConfigService implements IDatasetConfigService {
     private final IDatasetService datasetService;
 
     @Autowired
-    public DatasetConfigService(DatasetConfigRepository configRepository, IDatasetService datasetService) {
+    public DatasetConfigService(DatasetConfigRepository configRepository,
+                                IDatasetService datasetService) {
         this.configRepository = configRepository;
         this.datasetService = datasetService;
     }
@@ -43,7 +47,7 @@ public class DatasetConfigService implements IDatasetConfigService {
     @Override
     public DatasetConfig getConfig(long datasetId, long ownerId) {
         return configRepository
-                .findDatasetConfigByDatasetIdAndDatasetOwnerId(datasetId, ownerId)
+                .findDatasetConfig(datasetId, ownerId)
                 .orElseThrow(() ->
                         new DatasetConfigNotFoundException(String.format("Dataset with id=%d doesn't have config or you aren't an owner of the dataset", datasetId)));
     }
@@ -64,6 +68,25 @@ public class DatasetConfigService implements IDatasetConfigService {
         config.setUseIgnoreClasses(createDto.useIgnoreClasses);
 
         dataset.setConfig(config);
+        dataset.setModificationDate(Instant.now());
+
+        configRepository.save(config);
+
+        return config;
+    }
+
+    @Override
+    public DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId) {
+        DatasetConfig config = configRepository.findDatasetConfig(datasetId, ownerId)
+                .orElseThrow(() ->
+                        new DatasetConfigNotFoundException(String.format("Dataset with id=%d doesn't have config or you aren't an owner of the dataset", datasetId)));
+
+        config.setClasses(updateDto.classes);
+        config.setUseClasses(updateDto.useClasses);
+        config.setIgnoreClasses(updateDto.ignoreClasses);
+        config.setUseIgnoreClasses(updateDto.useIgnoreClasses);
+
+        config.getDataset().setModificationDate(Instant.now());
 
         configRepository.save(config);
 

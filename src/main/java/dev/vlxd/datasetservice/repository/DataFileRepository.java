@@ -15,7 +15,8 @@
 
 package dev.vlxd.datasetservice.repository;
 
-import dev.vlxd.datasetservice.model.DatasetConfig;
+import dev.vlxd.datasetservice.constant.PermissionType;
+import dev.vlxd.datasetservice.model.DataFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,11 +24,15 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface DatasetConfigRepository extends JpaRepository<DatasetConfig, Long> {
+public interface DataFileRepository extends JpaRepository<DataFile, Long> {
 
-    @Query("select d " +
-            "from dataset_config d " +
-            "where d.dataset.id = :datasetId " +
-            "and d.dataset.ownerId = :ownerId")
-    Optional<DatasetConfig> findDatasetConfig(long datasetId, long ownerId);
+    @Query("SELECT df " +
+            "FROM data_file df " +
+            "JOIN permission p ON df.dataGroup.dataset.id = p.dataset.id " +
+            "WHERE :userId MEMBER OF p.userIds " +
+            "AND df.id = :dataFileId " +
+            "AND df.dataGroup.id = :groupId " +
+            "AND df.dataGroup.dataset.id = :datasetId " +
+            "AND p.type = :permissionType")
+    Optional<DataFile> findDataFile(long datasetId, long groupId, long dataFileId, long userId, PermissionType permissionType);
 }

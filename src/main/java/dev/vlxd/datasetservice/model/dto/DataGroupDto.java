@@ -13,25 +13,23 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.dataset;
+package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.model.Dataset;
-import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import dev.vlxd.datasetservice.model.DataGroup;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface IDatasetService {
+@Relation(collectionRelation = "groups")
+public class DataGroupDto extends RepresentationModel<DataGroupDto> {
+    public Long id;
+    public String name;
+    public List<DataFileDto> files = new ArrayList<>();
 
-    Page<Dataset> listDatasets(long userId, Pageable pageable);
-
-    Dataset findById(long datasetId, long userId);
-
-    Dataset findByIdAndOwnerId(long datasetId, long ownerId);
-
-    Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
-
-    Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+    public DataGroupDto(DataGroup entity) {
+        id = entity.getId();
+        name = entity.getName();
+    }
 }

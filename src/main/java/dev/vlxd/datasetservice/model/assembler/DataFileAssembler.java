@@ -15,10 +15,11 @@
 
 package dev.vlxd.datasetservice.model.assembler;
 
-import dev.vlxd.datasetservice.controller.DatasetConfigController;
+import dev.vlxd.datasetservice.controller.DataFileController;
+import dev.vlxd.datasetservice.controller.DataGroupController;
 import dev.vlxd.datasetservice.controller.DatasetController;
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigDto;
+import dev.vlxd.datasetservice.model.DataFile;
+import dev.vlxd.datasetservice.model.dto.DataFileDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -28,26 +29,32 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class DatasetConfigAssembler implements RepresentationModelAssembler<DatasetConfig, DatasetConfigDto> {
+public class DataFileAssembler implements RepresentationModelAssembler<DataFile, DataFileDto> {
 
     @Override
-    public @NonNull DatasetConfigDto toModel(@NonNull DatasetConfig entity) {
-        DatasetConfigDto model = new DatasetConfigDto(entity);
+    public @NonNull DataFileDto toModel(@NonNull DataFile entity) {
+        DataFileDto model = new DataFileDto(entity);
 
         model.add(
                 linkTo(
-                        methodOn(DatasetConfigController.class).getConfig(entity.getDataset().getId(), -1))
+                        methodOn(DataFileController.class).getDataFile(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), entity.getId(), -1))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
-                        .withRel("dataset")
+                        methodOn(DataGroupController.class).getGroup(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), -1))
+                        .withRel("group"),
+                linkTo(
+                        methodOn(DatasetController.class).getDataset(entity.getDataGroup().getDataset().getId(), -1))
+                        .withRel("dataset"),
+                linkTo(
+                        methodOn(DataFileController.class).getResource(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), entity.getId(), -1))
+                        .withRel("resource")
         );
 
         return model;
     }
 
     @Override
-    public @NonNull CollectionModel<DatasetConfigDto> toCollectionModel(@NonNull Iterable<? extends DatasetConfig> entities) {
+    public @NonNull CollectionModel<DataFileDto> toCollectionModel(@NonNull Iterable<? extends DataFile> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

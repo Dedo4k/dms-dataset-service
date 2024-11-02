@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,7 +100,12 @@ public class ZipArchiveUploaderService implements IArchiveUploaderService {
         InputStreamResource inputStreamResource = new InputStreamResource(is);
         HttpEntity<InputStreamResource> httpEntity = new HttpEntity<>(inputStreamResource, httpHeaders);
 
-        return restTemplate.postForEntity(storageServiceUrl, httpEntity, String.class);
+        return restTemplate.postForEntity(
+                UriComponentsBuilder.fromHttpUrl(storageServiceUrl)
+                        .pathSegment("upload")
+                        .toUriString(),
+                httpEntity,
+                String.class);
     }
 
     @Override

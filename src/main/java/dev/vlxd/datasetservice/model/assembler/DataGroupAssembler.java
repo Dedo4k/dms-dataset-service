@@ -15,28 +15,41 @@
 
 package dev.vlxd.datasetservice.model.assembler;
 
-import dev.vlxd.datasetservice.controller.DatasetConfigController;
+import dev.vlxd.datasetservice.controller.DataGroupController;
 import dev.vlxd.datasetservice.controller.DatasetController;
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigDto;
+import dev.vlxd.datasetservice.model.DataGroup;
+import dev.vlxd.datasetservice.model.dto.DataGroupDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.stream.Collectors;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class DatasetConfigAssembler implements RepresentationModelAssembler<DatasetConfig, DatasetConfigDto> {
+public class DataGroupAssembler implements RepresentationModelAssembler<DataGroup, DataGroupDto> {
+
+    private final DataFileAssembler dataFileAssembler;
+
+    @Autowired
+    public DataGroupAssembler(DataFileAssembler dataFileAssembler) {
+        this.dataFileAssembler = dataFileAssembler;
+    }
 
     @Override
-    public @NonNull DatasetConfigDto toModel(@NonNull DatasetConfig entity) {
-        DatasetConfigDto model = new DatasetConfigDto(entity);
+    public @NonNull DataGroupDto toModel(@NonNull DataGroup entity) {
+        DataGroupDto model = new DataGroupDto(entity);
+        model.files = entity.getFiles().stream()
+                .map(dataFileAssembler::toModel)
+                .collect(Collectors.toList());
 
         model.add(
                 linkTo(
-                        methodOn(DatasetConfigController.class).getConfig(entity.getDataset().getId(), -1))
+                        methodOn(DataGroupController.class).getGroup(entity.getDataset().getId(), entity.getId(), -1))
                         .withRel("self"),
                 linkTo(
                         methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
@@ -47,7 +60,7 @@ public class DatasetConfigAssembler implements RepresentationModelAssembler<Data
     }
 
     @Override
-    public @NonNull CollectionModel<DatasetConfigDto> toCollectionModel(@NonNull Iterable<? extends DatasetConfig> entities) {
+    public @NonNull CollectionModel<DataGroupDto> toCollectionModel(@NonNull Iterable<? extends DataGroup> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

@@ -15,6 +15,8 @@
 
 package dev.vlxd.datasetservice.model.assembler;
 
+import dev.vlxd.datasetservice.controller.DataGroupController;
+import dev.vlxd.datasetservice.controller.DatasetConfigController;
 import dev.vlxd.datasetservice.controller.DatasetController;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
@@ -38,8 +40,11 @@ public class DatasetAssembler implements RepresentationModelAssembler<Dataset, D
                         methodOn(DatasetController.class).getDataset(entity.getId(), -1))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetController.class).getConfig(entity.getId(), -1))
+                        methodOn(DatasetConfigController.class).getConfig(entity.getId(), -1))
                         .withRel("config"),
+                linkTo(
+                        methodOn(DataGroupController.class).listGroups(entity.getId(), -1, null))
+                        .withRel("groups"),
                 linkTo(
                         methodOn(DatasetController.class).downloadDataset(entity.getId()))
                         .withRel("download")
