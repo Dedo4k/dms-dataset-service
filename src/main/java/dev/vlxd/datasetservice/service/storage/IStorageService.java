@@ -13,19 +13,16 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.file;
+package dev.vlxd.datasetservice.service.storage;
 
-import dev.vlxd.datasetservice.model.DataFile;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 import java.io.InputStream;
 
-public interface IDataFileService {
+public interface IStorageService {
 
-    DataFile getDataFile(long datasetId, long groupId, long dataFileId, long userId);
+    ResponseEntity<String> upload(InputStream inputStream, String filename);
 
-    ResponseEntity<Resource> getResource(long datasetId, long groupId, long dataFileId, long userId);
-
-    DataFile updateDataFile(long datasetId, long groupId, long dataFileId, InputStream inputStream, long userId);
+    ResponseEntity<Resource> getResource(String fileId);
 }

@@ -40,7 +40,7 @@ public class DataGroupService implements IDataGroupService {
     public DataGroup getGroup(long datasetId, long groupId, long userId) {
         return dataGroupRepository.findDataGroup(datasetId, groupId, userId, PermissionType.READ)
                 .orElseThrow(() ->
-                        new DataGroupNotFoundException(String.format("Data group with id=%d and datasetId=%d not found or you don't have READ permission", groupId, datasetId)));
+                        new DataGroupNotFoundException(String.format("Data group with id = %d and datasetId = %d not found or you don't have READ permission", groupId, datasetId)));
     }
 
     @Override

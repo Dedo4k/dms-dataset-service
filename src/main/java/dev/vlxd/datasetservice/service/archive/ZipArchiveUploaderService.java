@@ -18,15 +18,10 @@ package dev.vlxd.datasetservice.service.archive;
 import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.model.Dataset;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import dev.vlxd.datasetservice.service.storage.IStorageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,10 +31,11 @@ import java.util.zip.ZipInputStream;
 @Service
 public class ZipArchiveUploaderService implements IArchiveUploaderService {
 
-    private final String storageServiceUrl;
+    private final IStorageService storageService;
 
-    public ZipArchiveUploaderService(@Value("${storage.service.url}") String storageServiceUrl) {
-        this.storageServiceUrl = storageServiceUrl;
+    @Autowired
+    public ZipArchiveUploaderService(IStorageService storageService) {
+        this.storageService = storageService;
     }
 
     @Override
@@ -63,7 +59,7 @@ public class ZipArchiveUploaderService implements IArchiveUploaderService {
                         dataset.getDataGroups().put(groupName, dataGroup);
                     }
 
-                    ResponseEntity<String> response = upload(zis, storingName);
+                    ResponseEntity<String> response = storageService.upload(zis, storingName);
 
                     DataFile dataFile = new DataFile(
                             response.getBody(),
@@ -87,25 +83,6 @@ public class ZipArchiveUploaderService implements IArchiveUploaderService {
     @Override
     public InputStream archiveAndDownload(Dataset dataset) {
         return null;
-    }
-
-    @Override
-    public ResponseEntity<String> upload(InputStream is, String filename) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.set("X-Filename", filename);
-
-        InputStreamResource inputStreamResource = new InputStreamResource(is);
-        HttpEntity<InputStreamResource> httpEntity = new HttpEntity<>(inputStreamResource, httpHeaders);
-
-        return restTemplate.postForEntity(
-                UriComponentsBuilder.fromHttpUrl(storageServiceUrl)
-                        .pathSegment("upload")
-                        .toUriString(),
-                httpEntity,
-                String.class);
     }
 
     @Override
