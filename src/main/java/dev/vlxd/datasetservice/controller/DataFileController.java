@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @RequestMapping("/v1/datasets/{datasetId}/groups/{groupId}/files")
@@ -54,5 +58,20 @@ public class DataFileController {
                                                 @PathVariable long dataFileId,
                                                 @RequestHeader("X-User-Id") long userId) {
         return dataFileService.getResource(datasetId, groupId, dataFileId, userId);
+    }
+
+    @PutMapping("/{dataFileId}")
+    public ResponseEntity<DataFileDto> updateDataFileSource(@PathVariable long datasetId,
+                                                            @PathVariable long groupId,
+                                                            @PathVariable long dataFileId,
+                                                            @RequestHeader("X-User-Id") long userId,
+                                                            @RequestBody MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) {
+            DataFile dataFile = dataFileService.updateDataFile(datasetId, groupId, dataFileId, inputStream, userId);
+
+            return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to process file input stream", e);
+        }
     }
 }

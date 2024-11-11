@@ -56,14 +56,14 @@ public class DatasetService implements IDatasetService {
     public Dataset findById(long datasetId, long userId) {
         return datasetRepository.findDataset(datasetId, userId, PermissionType.READ)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you don't have READ permission", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you don't have READ permission", datasetId)));
     }
 
     @Override
     public Dataset findByIdAndOwnerId(long datasetId, long ownerId) {
         return datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
     }
 
     @Override
@@ -71,7 +71,7 @@ public class DatasetService implements IDatasetService {
         Dataset datasetToUpdate = datasetRepository
                 .findDatasetsByIdAndOwnerId(datasetId, userId)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
 
         datasetToUpdate.setAlias(dataset.name);
         datasetToUpdate.setDescription(dataset.description);

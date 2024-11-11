@@ -42,20 +42,20 @@ public class PermissionService implements IPermissionService {
     public Permission getPermission(long datasetId, long permissionId, long ownerId) {
         Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
 
         return dataset.getPermissions().stream()
                 .filter(p -> p.getId() == permissionId)
                 .findFirst()
                 .orElseThrow(() ->
-                        new PermissionNotFoundException(String.format("Permission with id=%d not found", permissionId)));
+                        new PermissionNotFoundException(String.format("Permission with id = %d not found", permissionId)));
     }
 
     @Override
     public List<Permission> listPermissions(long datasetId, long ownerId) {
         Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
 
         return dataset.getPermissions();
     }
