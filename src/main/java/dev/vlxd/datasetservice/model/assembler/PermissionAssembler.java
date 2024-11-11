@@ -15,11 +15,10 @@
 
 package dev.vlxd.datasetservice.model.assembler;
 
-import dev.vlxd.datasetservice.controller.DataGroupController;
 import dev.vlxd.datasetservice.controller.DatasetController;
-import dev.vlxd.datasetservice.model.DataGroup;
-import dev.vlxd.datasetservice.model.dto.DataGroupDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import dev.vlxd.datasetservice.controller.PermissionController;
+import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.dto.PermissionDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
@@ -29,25 +28,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class DataGroupAssembler implements RepresentationModelAssembler<DataGroup, DataGroupDto> {
-
-    private final DataFileAssembler dataFileAssembler;
-
-    @Autowired
-    public DataGroupAssembler(DataFileAssembler dataFileAssembler) {
-        this.dataFileAssembler = dataFileAssembler;
-    }
+public class PermissionAssembler implements RepresentationModelAssembler<Permission, PermissionDto> {
 
     @Override
-    public @NonNull DataGroupDto toModel(@NonNull DataGroup entity) {
-        DataGroupDto model = new DataGroupDto(entity);
-        model.files.addAll(entity.getFiles().stream()
-                .map(dataFileAssembler::toModel)
-                .toList());
+    public @NonNull PermissionDto toModel(@NonNull Permission entity) {
+        PermissionDto model = new PermissionDto(entity);
 
         model.add(
                 linkTo(
-                        methodOn(DataGroupController.class).getGroup(entity.getDataset().getId(), entity.getId(), -1))
+                        methodOn(PermissionController.class).getPermission(entity.getDataset().getId(), entity.getId(), -1))
                         .withRel("self"),
                 linkTo(
                         methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
@@ -58,7 +47,7 @@ public class DataGroupAssembler implements RepresentationModelAssembler<DataGrou
     }
 
     @Override
-    public @NonNull CollectionModel<DataGroupDto> toCollectionModel(@NonNull Iterable<? extends DataGroup> entities) {
+    public @NonNull CollectionModel<PermissionDto> toCollectionModel(@NonNull Iterable<? extends Permission> entities) {
         return RepresentationModelAssembler.super.toCollectionModel(entities);
     }
 }

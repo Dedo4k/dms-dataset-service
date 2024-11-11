@@ -13,17 +13,18 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.config;
+package dev.vlxd.datasetservice.service.permission;
 
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
+import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.dto.PermissionUpdateDto;
 
-public interface IDatasetConfigService {
+import java.util.List;
 
-    DatasetConfig getConfig(long datasetId, long userId);
+public interface IPermissionService {
 
-    DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
+    Permission getPermission(long datasetId, long permissionId, long ownerId);
 
-    DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId);
+    List<Permission> listPermissions(long datasetId, long ownerId);
+
+    Permission updatePermission(long datasetId, long permissionId, PermissionUpdateDto updateDto, long ownerId);
 }

@@ -18,6 +18,7 @@ package dev.vlxd.datasetservice.model.assembler;
 import dev.vlxd.datasetservice.controller.DataGroupController;
 import dev.vlxd.datasetservice.controller.DatasetConfigController;
 import dev.vlxd.datasetservice.controller.DatasetController;
+import dev.vlxd.datasetservice.controller.PermissionController;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
 import org.springframework.hateoas.CollectionModel;
@@ -45,6 +46,9 @@ public class DatasetAssembler implements RepresentationModelAssembler<Dataset, D
                 linkTo(
                         methodOn(DataGroupController.class).listGroups(entity.getId(), -1, null))
                         .withRel("groups"),
+                linkTo(
+                        methodOn(PermissionController.class).listPermissions(entity.getId(), -1))
+                        .withRel("permissions"),
                 linkTo(
                         methodOn(DatasetController.class).downloadDataset(entity.getId()))
                         .withRel("download")

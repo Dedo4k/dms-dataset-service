@@ -15,9 +15,7 @@
 
 package dev.vlxd.datasetservice.model.dto;
 
-import org.springframework.hateoas.RepresentationModel;
-
-public class DatasetUpdateDto extends RepresentationModel<DatasetUpdateDto> {
+public class DatasetUpdateDto {
     public String name;
     public String description;
 }

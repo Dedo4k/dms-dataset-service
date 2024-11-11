@@ -13,15 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.groups;
+package dev.vlxd.datasetservice.exception;
 
-import dev.vlxd.datasetservice.model.DataGroup;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+public class PermissionNotFoundException extends RuntimeException {
 
-public interface IDataGroupService {
+    public PermissionNotFoundException(String message) {
+        super(message);
+    }
 
-    DataGroup getGroup(long datasetId, long groupId, long userId);
-
-    Page<DataGroup> listGroups(long datasetId, long userId, Pageable pageable);
+    public PermissionNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

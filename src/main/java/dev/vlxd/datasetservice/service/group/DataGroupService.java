@@ -13,7 +13,7 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.groups;
+package dev.vlxd.datasetservice.service.group;
 
 import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DataGroupNotFoundException;

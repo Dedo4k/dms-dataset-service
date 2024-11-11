@@ -13,15 +13,24 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.files;
+package dev.vlxd.datasetservice.model.assembler;
 
-import dev.vlxd.datasetservice.model.DataFile;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.dto.PermissionDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public interface IDataFileService {
+@Component
+public class PermissionAssemblerService {
 
-    DataFile getDataFile(long datasetId, long groupId, long dataFileId, long userId);
+    private final PermissionAssembler permissionAssembler;
 
-    ResponseEntity<Resource> getResource(long datasetId, long groupId, long dataFileId, long userId);
+    @Autowired
+    public PermissionAssemblerService(PermissionAssembler permissionAssembler) {
+        this.permissionAssembler = permissionAssembler;
+    }
+
+    public PermissionDto toModel(Permission permission) {
+        return permissionAssembler.toModel(permission);
+    }
 }

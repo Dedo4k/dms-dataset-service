@@ -13,17 +13,11 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.config;
+package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface IDatasetConfigService {
-
-    DatasetConfig getConfig(long datasetId, long userId);
-
-    DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
-
-    DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId);
+public class PermissionUpdateDto {
+    public List<Long> userIds = new ArrayList<>();
 }

@@ -15,6 +15,7 @@
 
 package dev.vlxd.datasetservice.service.config;
 
+import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DatasetConfigAlreadyExistsException;
 import dev.vlxd.datasetservice.exception.DatasetConfigNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
@@ -45,11 +46,11 @@ public class DatasetConfigService implements IDatasetConfigService {
     }
 
     @Override
-    public DatasetConfig getConfig(long datasetId, long ownerId) {
+    public DatasetConfig getConfig(long datasetId, long userId) {
         return configRepository
-                .findDatasetConfig(datasetId, ownerId)
+                .findDatasetConfig(datasetId, userId, PermissionType.READ)
                 .orElseThrow(() ->
-                        new DatasetConfigNotFoundException(String.format("Dataset with id=%d doesn't have config or you aren't an owner of the dataset", datasetId)));
+                        new DatasetConfigNotFoundException(String.format("Dataset with id=%d doesn't have config or or you don't have READ permission", datasetId)));
     }
 
     @Override
@@ -77,7 +78,7 @@ public class DatasetConfigService implements IDatasetConfigService {
 
     @Override
     public DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId) {
-        DatasetConfig config = configRepository.findDatasetConfig(datasetId, ownerId)
+        DatasetConfig config = configRepository.findDatasetConfigAsOwner(datasetId, ownerId)
                 .orElseThrow(() ->
                         new DatasetConfigNotFoundException(String.format("Dataset with id=%d doesn't have config or you aren't an owner of the dataset", datasetId)));
 
