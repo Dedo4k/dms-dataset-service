@@ -18,20 +18,21 @@ package dev.vlxd.datasetservice.model.dto;
 import dev.vlxd.datasetservice.model.DatasetConfig;
 import org.springframework.hateoas.RepresentationModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatasetConfigDto extends RepresentationModel<DatasetConfigDto> {
     public long id;
-    public List<String> classes;
+    public List<String> classes = new ArrayList<>();
     public boolean useClasses;
-    public List<String> ignoreClasses;
+    public List<String> ignoreClasses = new ArrayList<>();
     public boolean useIgnoreClasses;
 
     public DatasetConfigDto(DatasetConfig entity) {
         id = entity.getId();
-        classes = entity.getClasses();
+        classes.addAll(entity.getClasses());
         useClasses = entity.isUseClasses();
-        ignoreClasses = entity.getIgnoreClasses();
+        ignoreClasses.addAll(entity.getIgnoreClasses());
         useIgnoreClasses = entity.isUseIgnoreClasses();
     }
 }

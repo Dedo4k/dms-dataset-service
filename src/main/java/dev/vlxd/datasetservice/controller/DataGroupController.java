@@ -18,7 +18,7 @@ package dev.vlxd.datasetservice.controller;
 import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.model.assembler.DataGroupAssemblerService;
 import dev.vlxd.datasetservice.model.dto.DataGroupDto;
-import dev.vlxd.datasetservice.service.groups.IDataGroupService;
+import dev.vlxd.datasetservice.service.group.IDataGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

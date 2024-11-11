@@ -24,10 +24,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -58,12 +58,12 @@ public class Dataset {
     @Column(name = "modified_at", nullable = false)
     private Instant modificationDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "config_id", referencedColumnName = "id")
     private DatasetConfig config;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
-    private Set<Permission> permissions = new HashSet<>();
+    private List<Permission> permissions = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "dataset")
     @MapKey(name = "name")

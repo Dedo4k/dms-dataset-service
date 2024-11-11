@@ -41,7 +41,7 @@ public class DataGroup {
     @Column(name = "group_name", nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id", referencedColumnName = "id", nullable = false)
     private Dataset dataset;
 

@@ -13,17 +13,25 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.config;
+package dev.vlxd.datasetservice.model.dto;
 
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
+import dev.vlxd.datasetservice.constant.PermissionType;
+import dev.vlxd.datasetservice.model.Permission;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.core.Relation;
 
-public interface IDatasetConfigService {
+import java.util.ArrayList;
+import java.util.List;
 
-    DatasetConfig getConfig(long datasetId, long userId);
+@Relation(collectionRelation = "permissions")
+public class PermissionDto extends RepresentationModel<PermissionDto> {
+    public Long id;
+    public PermissionType type;
+    public List<Long> userIds = new ArrayList<>();
 
-    DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
-
-    DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId);
+    public PermissionDto(Permission permission) {
+        id = permission.getId();
+        type = permission.getType();
+        userIds.addAll(permission.getUserIds());
+    }
 }

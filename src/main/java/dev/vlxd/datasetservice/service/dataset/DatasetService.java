@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -70,9 +69,9 @@ public class DatasetService implements IDatasetService {
     @Override
     public Dataset update(long datasetId, DatasetUpdateDto dataset, long userId) {
         Dataset datasetToUpdate = datasetRepository
-                .findDataset(datasetId, userId, PermissionType.UPDATE)
+                .findDatasetsByIdAndOwnerId(datasetId, userId)
                 .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you don't have READ permission", datasetId)));
+                        new DatasetNotFoundException(String.format("Dataset with id=%d not found or you aren't an owner of the dataset", datasetId)));
 
         datasetToUpdate.setAlias(dataset.name);
         datasetToUpdate.setDescription(dataset.description);
@@ -100,7 +99,7 @@ public class DatasetService implements IDatasetService {
         dataset.setPermissions(
                 Arrays.stream(PermissionType.values())
                         .map(type -> new Permission(type, dataset, Collections.singletonList(userId)))
-                        .collect(Collectors.toSet()));
+                        .toList());
 
         datasetRepository.save(dataset);
 

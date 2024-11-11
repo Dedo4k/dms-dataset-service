@@ -13,17 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.config;
+package dev.vlxd.datasetservice.service.file;
 
-import dev.vlxd.datasetservice.model.DatasetConfig;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigCreateDto;
-import dev.vlxd.datasetservice.model.dto.DatasetConfigUpdateDto;
+import dev.vlxd.datasetservice.model.DataFile;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
-public interface IDatasetConfigService {
+public interface IDataFileService {
 
-    DatasetConfig getConfig(long datasetId, long userId);
+    DataFile getDataFile(long datasetId, long groupId, long dataFileId, long userId);
 
-    DatasetConfig create(long datasetId, DatasetConfigCreateDto createDto, long ownerId);
-
-    DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId);
+    ResponseEntity<Resource> getResource(long datasetId, long groupId, long dataFileId, long userId);
 }

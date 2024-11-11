@@ -49,7 +49,7 @@ public class DataFile {
     @Column(name = "modified_at", nullable = false)
     private Instant modificationDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
     private DataGroup dataGroup;
 

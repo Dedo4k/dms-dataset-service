@@ -18,7 +18,7 @@ package dev.vlxd.datasetservice.controller;
 import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.model.assembler.DataFileAssemblerService;
 import dev.vlxd.datasetservice.model.dto.DataFileDto;
-import dev.vlxd.datasetservice.service.files.IDataFileService;
+import dev.vlxd.datasetservice.service.file.IDataFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
