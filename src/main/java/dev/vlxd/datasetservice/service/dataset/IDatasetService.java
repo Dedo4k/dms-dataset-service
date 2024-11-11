@@ -33,5 +33,7 @@ public interface IDatasetService {
 
     Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
 
+    Dataset deleteDataset(long datasetId, long userId);
+
     Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
 }
