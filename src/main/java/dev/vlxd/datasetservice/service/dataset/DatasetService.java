@@ -17,6 +17,7 @@ package dev.vlxd.datasetservice.service.dataset;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.constant.PermissionType;
+import dev.vlxd.datasetservice.exception.DatasetDeleteException;
 import dev.vlxd.datasetservice.exception.DatasetNameIsTakenException;
 import dev.vlxd.datasetservice.exception.DatasetNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
@@ -24,9 +25,12 @@ import dev.vlxd.datasetservice.model.Permission;
 import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.repository.DatasetRepository;
 import dev.vlxd.datasetservice.service.archive.ArchiveManagerService;
+import dev.vlxd.datasetservice.service.storage.IStorageService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -40,11 +44,14 @@ public class DatasetService implements IDatasetService {
 
     private final ArchiveManagerService archiveService;
     private final DatasetRepository datasetRepository;
+    private final IStorageService storageService;
 
     public DatasetService(ArchiveManagerService archiveService,
-                          DatasetRepository datasetRepository) {
+                          DatasetRepository datasetRepository,
+                          IStorageService storageService) {
         this.archiveService = archiveService;
         this.datasetRepository = datasetRepository;
+        this.storageService = storageService;
     }
 
     @Override
@@ -80,6 +87,27 @@ public class DatasetService implements IDatasetService {
         datasetRepository.save(datasetToUpdate);
 
         return datasetToUpdate;
+    }
+
+    @Override
+    public Dataset deleteDataset(long datasetId, long userId) {
+        Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, userId)
+                .orElseThrow(() ->
+                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+
+        try {
+            datasetRepository.delete(dataset);
+        } catch (Exception e) {
+            throw new DatasetDeleteException(String.format("Failed to delete dataset with id = %d", datasetId), e);
+        }
+
+        ResponseEntity<Boolean> response = storageService.delete(String.join("/", String.valueOf(dataset.getOwnerId()), dataset.getName()));
+
+        if (!HttpStatus.OK.equals(response.getStatusCode()) || Boolean.FALSE.equals(response.getBody())) {
+            throw new DatasetDeleteException(String.format("Failed to delete dataset with id = %d", datasetId));
+        }
+
+        return dataset;
     }
 
     @Override

@@ -68,4 +68,18 @@ public class StorageService implements IStorageService {
                 Resource.class
         );
     }
+
+    @Override
+    public ResponseEntity<Boolean> delete(String fileId) {
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.exchange(
+                UriComponentsBuilder.fromHttpUrl(storageServiceUrl)
+                        .pathSegment("delete")
+                        .queryParam("fileId", fileId)
+                        .toUriString(),
+                HttpMethod.DELETE,
+                null,
+                Boolean.class
+        );
+    }
 }

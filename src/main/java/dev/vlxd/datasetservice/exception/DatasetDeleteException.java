@@ -13,18 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.storage;
+package dev.vlxd.datasetservice.exception;
 
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+public class DatasetDeleteException extends RuntimeException {
 
-import java.io.InputStream;
+    public DatasetDeleteException(String message) {
+        super(message);
+    }
 
-public interface IStorageService {
-
-    ResponseEntity<String> upload(InputStream inputStream, String filename);
-
-    ResponseEntity<Resource> getResource(String fileId);
-
-    ResponseEntity<Boolean> delete(String fileId);
+    public DatasetDeleteException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

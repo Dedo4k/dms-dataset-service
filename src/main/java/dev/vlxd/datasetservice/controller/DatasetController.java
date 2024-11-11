@@ -80,8 +80,9 @@ public class DatasetController {
     }
 
     @DeleteMapping("/{datasetId}")
-    public ResponseEntity<Object> deleteDataset(@PathVariable String datasetId) {
-        return ResponseEntity.ok(null);
+    public ResponseEntity<DatasetDto> deleteDataset(@PathVariable long datasetId,
+                                                    @RequestHeader("X-User-Id") long userId) {
+        return ResponseEntity.ok(datasetAssembler.toModal(datasetService.deleteDataset(datasetId, userId)));
     }
 
     @PostMapping(value = "/upload", consumes = {"application/zip"})
