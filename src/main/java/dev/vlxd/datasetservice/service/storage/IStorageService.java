@@ -15,6 +15,8 @@
 
 package dev.vlxd.datasetservice.service.storage;
 
+import dev.vlxd.datasetservice.constant.ArchiveType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -27,4 +29,6 @@ public interface IStorageService {
     ResponseEntity<Resource> getResource(String fileId);
 
     ResponseEntity<Boolean> delete(String fileId);
+
+    void download(String fileId, ArchiveType archiveType, HttpServletResponse response);
 }

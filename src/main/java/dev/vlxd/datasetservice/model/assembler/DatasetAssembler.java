@@ -15,6 +15,7 @@
 
 package dev.vlxd.datasetservice.model.assembler;
 
+import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.controller.DataGroupController;
 import dev.vlxd.datasetservice.controller.DatasetConfigController;
 import dev.vlxd.datasetservice.controller.DatasetController;
@@ -22,9 +23,11 @@ import dev.vlxd.datasetservice.controller.PermissionController;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -49,8 +52,11 @@ public class DatasetAssembler implements RepresentationModelAssembler<Dataset, D
                 linkTo(
                         methodOn(PermissionController.class).listPermissions(entity.getId(), -1))
                         .withRel("permissions"),
-                linkTo(
-                        methodOn(DatasetController.class).downloadDataset(entity.getId()))
+                Link.of(ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/v1/datasets/{id}/download")
+                        .queryParam("archiveType", ArchiveType.ZIP)
+                        .buildAndExpand(entity.getId())
+                        .toUriString())
                         .withRel("download")
         );
 

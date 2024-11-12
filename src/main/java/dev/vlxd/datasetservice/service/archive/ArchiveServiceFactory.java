@@ -24,14 +24,14 @@ import java.util.Map;
 @Component
 public class ArchiveServiceFactory {
 
-    private final Map<ArchiveType, IArchiveUploaderService> archiveServices;
+    private final Map<ArchiveType, IArchiveService> archiveServices;
 
     @Autowired
-    public ArchiveServiceFactory(Map<ArchiveType, IArchiveUploaderService> archiveServices) {
+    public ArchiveServiceFactory(Map<ArchiveType, IArchiveService> archiveServices) {
         this.archiveServices = archiveServices;
     }
 
-    public IArchiveUploaderService getArchiveService(ArchiveType archiveType) {
+    public IArchiveService getArchiveService(ArchiveType archiveType) {
         return archiveServices.get(archiveType);
     }
 }

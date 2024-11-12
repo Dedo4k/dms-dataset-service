@@ -23,6 +23,8 @@ import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -98,8 +100,11 @@ public class DatasetController {
         }
     }
 
-    @PostMapping("/{datasetId}/download")
-    public ResponseEntity<Object> downloadDataset(@PathVariable long datasetId) {
-        return ResponseEntity.ok(null);
+    @GetMapping("/{datasetId}/download")
+    public void downloadDataset(@PathVariable long datasetId,
+                                @PathParam("archiveType") ArchiveType archiveType,
+                                @RequestHeader("X-User-Id") long userId,
+                                HttpServletResponse response) {
+        datasetService.downloadDataset(datasetId,  archiveType, response, userId);
     }
 }

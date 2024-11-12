@@ -15,16 +15,20 @@
 
 package dev.vlxd.datasetservice.service.storage;
 
+import dev.vlxd.datasetservice.constant.ArchiveType;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 @Service
 public class StorageService implements IStorageService {
@@ -32,7 +36,7 @@ public class StorageService implements IStorageService {
     private final String storageServiceUrl;
 
     @Autowired
-    public StorageService(@Value("${storage.service.url}")  String storageServiceUrl) {
+    public StorageService(@Value("${storage.service.url}") String storageServiceUrl) {
         this.storageServiceUrl = storageServiceUrl;
     }
 
@@ -80,6 +84,48 @@ public class StorageService implements IStorageService {
                 HttpMethod.DELETE,
                 null,
                 Boolean.class
+        );
+    }
+
+    @Override
+    public void download(String fileId, ArchiveType archiveType, HttpServletResponse response) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseExtractor<Void> responseExtractor = clientHttpResponse -> {
+
+            response.setStatus(clientHttpResponse.getStatusCode().value());
+            MediaType contentType = clientHttpResponse.getHeaders().getContentType();
+            if (contentType != null) {
+                response.setContentType(contentType.toString());
+            }
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, clientHttpResponse.getHeaders().getContentDisposition().toString());
+
+            try (InputStream inputStream = clientHttpResponse.getBody();
+                 OutputStream outputStream = response.getOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+
+                outputStream.flush();
+
+                return null;
+            } catch (Exception e) {
+                throw new RuntimeException("Error proxying the file stream", e);
+            }
+        };
+
+        restTemplate.execute(
+                UriComponentsBuilder.fromHttpUrl(storageServiceUrl)
+                        .pathSegment("archive")
+                        .queryParam("fileId", fileId)
+                        .queryParam("archiveType", archiveType.name())
+                        .toUriString(),
+                HttpMethod.GET,
+                null,
+                responseExtractor
         );
     }
 }

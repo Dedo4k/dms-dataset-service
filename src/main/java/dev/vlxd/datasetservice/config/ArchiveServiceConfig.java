@@ -16,7 +16,7 @@
 package dev.vlxd.datasetservice.config;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
-import dev.vlxd.datasetservice.service.archive.IArchiveUploaderService;
+import dev.vlxd.datasetservice.service.archive.IArchiveService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +28,8 @@ import java.util.Map;
 public class ArchiveServiceConfig {
 
     @Bean
-    public Map<ArchiveType, IArchiveUploaderService> archiveServices(@Qualifier("zipArchiveUploaderService") IArchiveUploaderService zipArchiveService) {
-        Map<ArchiveType, IArchiveUploaderService> services = new HashMap<>();
+    public Map<ArchiveType, IArchiveService> archiveServices(@Qualifier("zipArchiveService") IArchiveService zipArchiveService) {
+        Map<ArchiveType, IArchiveService> services = new HashMap<>();
         services.put(ArchiveType.ZIP, zipArchiveService);
         return services;
     }

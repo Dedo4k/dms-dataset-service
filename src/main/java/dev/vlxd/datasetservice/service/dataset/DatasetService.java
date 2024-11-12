@@ -26,6 +26,7 @@ import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.repository.DatasetRepository;
 import dev.vlxd.datasetservice.service.archive.ArchiveManagerService;
 import dev.vlxd.datasetservice.service.storage.IStorageService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -132,5 +133,12 @@ public class DatasetService implements IDatasetService {
         datasetRepository.save(dataset);
 
         return dataset;
+    }
+
+    @Override
+    public void downloadDataset(long datasetId, ArchiveType archiveType, HttpServletResponse response, long userId) {
+        Dataset dataset = findById(datasetId, userId);
+
+        storageService.download( String.join("/", String.valueOf(userId), dataset.getName()), archiveType, response);
     }
 }
