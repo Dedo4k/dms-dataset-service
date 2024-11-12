@@ -31,16 +31,12 @@ public class ArchiveManagerService {
     }
 
     public Dataset extractAndUpload(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId) {
-        IArchiveUploaderService archiveService = archiveServiceFactory.getArchiveService(archiveType);
+        IArchiveService archiveService = archiveServiceFactory.getArchiveService(archiveType);
 
         if (archiveService == null) {
             throw new UnsupportedOperationException("Archive service not found");
         }
 
         return archiveService.extractAndUpload(inputStream, datasetName, userId);
-    }
-
-    public InputStream archiveDataset(Dataset dataset) {
-        return null;
     }
 }

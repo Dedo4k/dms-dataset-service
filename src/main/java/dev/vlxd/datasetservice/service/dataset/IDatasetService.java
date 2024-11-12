@@ -18,6 +18,7 @@ package dev.vlxd.datasetservice.service.dataset;
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -36,4 +37,6 @@ public interface IDatasetService {
     Dataset deleteDataset(long datasetId, long userId);
 
     Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
+
+    void downloadDataset(long datasetId, ArchiveType archiveType, HttpServletResponse response, long userId);
 }

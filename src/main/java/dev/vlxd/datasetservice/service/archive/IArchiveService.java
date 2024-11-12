@@ -19,11 +19,7 @@ import dev.vlxd.datasetservice.model.Dataset;
 
 import java.io.InputStream;
 
-public interface IArchiveUploaderService {
+public interface IArchiveService {
 
     Dataset extractAndUpload(InputStream inputStream, String datasetName, long userId);
-
-    InputStream archiveAndDownload(Dataset dataset);
-
-    InputStream download();
 }

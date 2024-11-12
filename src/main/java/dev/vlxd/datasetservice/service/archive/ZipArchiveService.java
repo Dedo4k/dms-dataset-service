@@ -29,12 +29,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
-public class ZipArchiveUploaderService implements IArchiveUploaderService {
+public class ZipArchiveService implements IArchiveService {
 
     private final IStorageService storageService;
 
     @Autowired
-    public ZipArchiveUploaderService(IStorageService storageService) {
+    public ZipArchiveService(IStorageService storageService) {
         this.storageService = storageService;
     }
 
@@ -78,16 +78,6 @@ public class ZipArchiveUploaderService implements IArchiveUploaderService {
         }
 
         return dataset;
-    }
-
-    @Override
-    public InputStream archiveAndDownload(Dataset dataset) {
-        return null;
-    }
-
-    @Override
-    public InputStream download() {
-        return null;
     }
 
     protected static class NonClosableZipInputStream extends ZipInputStream {
