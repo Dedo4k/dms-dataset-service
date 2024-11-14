@@ -13,14 +13,17 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.repository;
+package dev.vlxd.datasetservice.exception;
 
-import dev.vlxd.datasetservice.model.DataFile;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.io.IOException;
 
-@Repository
-public interface DataFileRepository extends JpaRepository<DataFile, Long> {
+public class FilenameWithoutExtensionException extends IOException {
 
-    boolean existsByFileNameAndDataGroupId(String filename, long groupId);
+    public FilenameWithoutExtensionException(String message) {
+        super(message);
+    }
+
+    public FilenameWithoutExtensionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

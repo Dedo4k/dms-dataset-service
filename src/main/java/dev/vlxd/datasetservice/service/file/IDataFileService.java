@@ -23,6 +23,10 @@ import java.io.InputStream;
 
 public interface IDataFileService {
 
+    DataFile createDataFile(long datasetId, long groupId, String filename, long userId);
+
+    DataFile createDataFile(long datasetId, long groupId, String filename, InputStream inputStream, long userId);
+
     DataFile getDataFile(long datasetId, long dataFileId, long userId);
 
     ResponseEntity<Resource> getResource(long datasetId, long dataFileId, long userId);

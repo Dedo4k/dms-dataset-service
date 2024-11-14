@@ -15,12 +15,17 @@
 
 package dev.vlxd.datasetservice.service.file;
 
+import dev.vlxd.datasetservice.exception.DataFileAlreadyExistsException;
 import dev.vlxd.datasetservice.exception.DataFileNotFoundException;
+import dev.vlxd.datasetservice.exception.FilenameWithoutExtensionException;
 import dev.vlxd.datasetservice.exception.PermissionDeniedException;
 import dev.vlxd.datasetservice.model.DataFile;
+import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.repository.DataFileRepository;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
+import dev.vlxd.datasetservice.service.group.IDataGroupService;
 import dev.vlxd.datasetservice.service.storage.IStorageService;
+import dev.vlxd.datasetservice.util.FileUtils;
 import dev.vlxd.datasetservice.util.Permissions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +44,82 @@ public class DataFileService implements IDataFileService {
     private final DataFileRepository dataFileRepository;
     private final IDatasetService datasetService;
     private final IStorageService storageService;
+    private final IDataGroupService dataGroupService;
 
     @Autowired
     public DataFileService(
-            DataFileRepository dataFileRepository, IDatasetService datasetService,
-            IStorageService storageService
+            DataFileRepository dataFileRepository,
+            IDatasetService datasetService,
+            IStorageService storageService,
+            IDataGroupService dataGroupService
     ) {
         this.dataFileRepository = dataFileRepository;
         this.datasetService = datasetService;
         this.storageService = storageService;
+        this.dataGroupService = dataGroupService;
+    }
+
+    @Override
+    public DataFile createDataFile(long datasetId, long groupId, String filename, long userId) {
+        return createDataFile(datasetId, groupId, filename, InputStream.nullInputStream(), userId);
+    }
+
+    @Override
+    public DataFile createDataFile(
+            long datasetId,
+            long groupId,
+            String filename,
+            InputStream inputStream,
+            long userId
+    ) {
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.CREATE)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to create data file in dataset with id = %d",
+                    userId,
+                    Permissions.CREATE,
+                    datasetId
+            ));
+        }
+
+        DataGroup group = dataGroupService.getGroup(datasetId, groupId, userId);
+
+        try {
+            if (!group.getName().equals(FileUtils.removeFileExtension(filename))) {
+                throw new IllegalArgumentException("Filename without extension should be equals to data group name");
+            }
+        } catch (FilenameWithoutExtensionException e) {
+            throw new IllegalArgumentException(e);
+        }
+
+        String fullName = String.join(
+                "/",
+                String.valueOf(userId),
+                group.getDataset().getName(),
+                filename
+        );
+
+        if (dataFileRepository.existsByFileNameAndDataGroupId(filename, group.getId())) {
+            throw new DataFileAlreadyExistsException(String.format(
+                    "Data file with name = %s already exists in dataset with id = %d",
+                    filename,
+                    datasetId
+            ));
+        }
+
+        ResponseEntity<String> response = storageService.upload(inputStream, fullName);
+
+        if (!HttpStatus.OK.equals(response.getStatusCode())) {
+            throw new RuntimeException(String.format(
+                    "Failed to update data file. Status code = %s",
+                    response.getStatusCode()
+            ));
+        }
+
+        DataFile dataFile = new DataFile(response.getBody(), filename, Instant.now(), Instant.now(), group);
+
+        dataFileRepository.save(dataFile);
+
+        return dataFile;
     }
 
     @Override
