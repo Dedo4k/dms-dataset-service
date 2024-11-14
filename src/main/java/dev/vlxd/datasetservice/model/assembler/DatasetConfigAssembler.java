@@ -36,10 +36,16 @@ public class DatasetConfigAssembler implements RepresentationModelAssembler<Data
 
         model.add(
                 linkTo(
-                        methodOn(DatasetConfigController.class).getConfig(entity.getDataset().getId(), -1))
+                        methodOn(DatasetConfigController.class).getConfig(
+                                entity.getDataset().getId(),
+                                -1
+                        ))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getDataset().getId(),
+                                -1
+                        ))
                         .withRel("dataset")
         );
 

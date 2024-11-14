@@ -37,7 +37,7 @@ public class DataFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "file_id", nullable = false)
+    @Column(name = "file_id", nullable = false, unique = true)
     private String fileId;
 
     @Column(name = "file_name", nullable = false)
@@ -53,7 +53,13 @@ public class DataFile {
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
     private DataGroup dataGroup;
 
-    public DataFile(String fileId, String fileName, Instant creationDate, Instant modificationDate, DataGroup dataGroup) {
+    public DataFile(
+            String fileId,
+            String fileName,
+            Instant creationDate,
+            Instant modificationDate,
+            DataGroup dataGroup
+    ) {
         this.fileId = fileId;
         this.fileName = fileName;
         this.dataGroup = dataGroup;

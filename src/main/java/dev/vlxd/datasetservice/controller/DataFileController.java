@@ -36,38 +36,46 @@ public class DataFileController {
     private final DataFileAssemblerService dataFileAssembler;
 
     @Autowired
-    public DataFileController(IDataFileService dataFileService,
-                              DataFileAssemblerService dataFileAssembler) {
+    public DataFileController(
+            IDataFileService dataFileService,
+            DataFileAssemblerService dataFileAssembler
+    ) {
         this.dataFileService = dataFileService;
         this.dataFileAssembler = dataFileAssembler;
     }
 
     @GetMapping("/{dataFileId}")
-    public ResponseEntity<DataFileDto> getDataFile(@PathVariable long datasetId,
-                                                   @PathVariable long groupId,
-                                                   @PathVariable long dataFileId,
-                                                   @RequestHeader("X-User-Id") long userId) {
-        DataFile dataFile = dataFileService.getDataFile(datasetId, groupId, dataFileId, userId);
+    public ResponseEntity<DataFileDto> getDataFile(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @PathVariable long dataFileId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
+        DataFile dataFile = dataFileService.getDataFile(datasetId, dataFileId, userId);
 
         return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
     }
 
     @GetMapping("/{dataFileId}/resource")
-    public ResponseEntity<Resource> getResource(@PathVariable long datasetId,
-                                                @PathVariable long groupId,
-                                                @PathVariable long dataFileId,
-                                                @RequestHeader("X-User-Id") long userId) {
-        return dataFileService.getResource(datasetId, groupId, dataFileId, userId);
+    public ResponseEntity<Resource> getResource(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @PathVariable long dataFileId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
+        return dataFileService.getResource(datasetId, dataFileId, userId);
     }
 
     @PutMapping("/{dataFileId}")
-    public ResponseEntity<DataFileDto> updateDataFileSource(@PathVariable long datasetId,
-                                                            @PathVariable long groupId,
-                                                            @PathVariable long dataFileId,
-                                                            @RequestHeader("X-User-Id") long userId,
-                                                            @RequestBody MultipartFile file) {
+    public ResponseEntity<DataFileDto> updateDataFileSource(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @PathVariable long dataFileId,
+            @RequestHeader("X-User-Id") long userId,
+            @RequestBody MultipartFile file
+    ) {
         try (InputStream inputStream = file.getInputStream()) {
-            DataFile dataFile = dataFileService.updateDataFile(datasetId, groupId, dataFileId, inputStream, userId);
+            DataFile dataFile = dataFileService.updateDataFile(datasetId, dataFileId, inputStream, userId);
 
             return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
         } catch (IOException e) {

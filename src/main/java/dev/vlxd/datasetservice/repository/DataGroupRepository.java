@@ -15,7 +15,6 @@
 
 package dev.vlxd.datasetservice.repository;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.model.DataGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,25 +22,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface DataGroupRepository extends JpaRepository<DataGroup, Long> {
 
-    @Query("SELECT dg " +
-            "FROM data_group dg " +
-            "JOIN permission p ON dg.dataset.id = p.dataset.id " +
-            "WHERE :userId MEMBER OF p.userIds " +
-            "AND dg.id = :groupId " +
-            "AND dg.dataset.id = :datasetId " +
-            "AND p.type = :permissionType")
-    Optional<DataGroup> findDataGroup(long datasetId, long groupId, long userId, PermissionType permissionType);
+    Page<DataGroup> findAllByDatasetId(long datasetId, Pageable pageable);
 
-    @Query("SELECT dg " +
+    @Query("SELECT count(dg) > 0 " +
             "FROM data_group dg " +
-            "JOIN permission p ON dg.dataset.id = p.dataset.id " +
-            "WHERE :userId MEMBER OF p.userIds " +
-            "AND dg.dataset.id = :datasetId " +
-            "AND p.type = :permissionType")
-    Page<DataGroup> findDataGroups(long datasetId, long userId, PermissionType permissionType, Pageable pageable);
+            "WHERE dg.name = :name " +
+            "AND dg.dataset.id = :datasetId")
+    boolean existsDataGroupByName(long datasetId, String name);
 }

@@ -16,13 +16,16 @@
 package dev.vlxd.datasetservice.service.dataset;
 
 import dev.vlxd.datasetservice.constant.ArchiveType;
+import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.dto.DatasetCreateDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.io.InputStream;
+import java.util.List;
 
 public interface IDatasetService {
 
@@ -32,6 +35,8 @@ public interface IDatasetService {
 
     Dataset findByIdAndOwnerId(long datasetId, long ownerId);
 
+    Dataset createDataset(DatasetCreateDto createDto, long userId);
+
     Dataset update(long datasetId, DatasetUpdateDto dataset, long userId);
 
     Dataset deleteDataset(long datasetId, long userId);
@@ -39,4 +44,6 @@ public interface IDatasetService {
     Dataset uploadDataset(ArchiveType archiveType, InputStream inputStream, String datasetName, long userId);
 
     void downloadDataset(long datasetId, ArchiveType archiveType, HttpServletResponse response, long userId);
+
+    boolean checkUserPermissions(long datasetId, long userId, List<PermissionType> permissions);
 }

@@ -37,16 +37,33 @@ public class DataFileAssembler implements RepresentationModelAssembler<DataFile,
 
         model.add(
                 linkTo(
-                        methodOn(DataFileController.class).getDataFile(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), entity.getId(), -1))
+                        methodOn(DataFileController.class).getDataFile(
+                                entity.getDataGroup().getDataset().getId(),
+                                entity.getDataGroup().getId(),
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DataGroupController.class).getGroup(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), -1))
+                        methodOn(DataGroupController.class).getGroup(
+                                entity.getDataGroup().getDataset().getId(),
+                                entity.getDataGroup().getId(),
+                                -1
+                        ))
                         .withRel("group"),
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getDataGroup().getDataset().getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getDataGroup().getDataset().getId(),
+                                -1
+                        ))
                         .withRel("dataset"),
                 linkTo(
-                        methodOn(DataFileController.class).getResource(entity.getDataGroup().getDataset().getId(), entity.getDataGroup().getId(), entity.getId(), -1))
+                        methodOn(DataFileController.class).getResource(
+                                entity.getDataGroup().getDataset().getId(),
+                                entity.getDataGroup().getId(),
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("resource")
         );
 

@@ -18,6 +18,7 @@ package dev.vlxd.datasetservice.controller;
 import dev.vlxd.datasetservice.constant.ArchiveType;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.assembler.DatasetAssemblerService;
+import dev.vlxd.datasetservice.model.dto.DatasetCreateDto;
 import dev.vlxd.datasetservice.model.dto.DatasetDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUploadDto;
@@ -45,52 +46,69 @@ public class DatasetController {
     private final DatasetAssemblerService datasetAssembler;
 
     @Autowired
-    public DatasetController(IDatasetService datasetService,
-                             DatasetAssemblerService datasetAssembler) {
+    public DatasetController(
+            IDatasetService datasetService,
+            DatasetAssemblerService datasetAssembler
+    ) {
         this.datasetService = datasetService;
         this.datasetAssembler = datasetAssembler;
     }
 
     @PostMapping
-    public ResponseEntity<Object> createDataset() {
-        return ResponseEntity.ok(null);
+    public ResponseEntity<DatasetDto> createDataset(
+            @RequestHeader("X-User-Id") long userId,
+            @RequestBody DatasetCreateDto createDto
+    ) {
+        Dataset dataset = datasetService.createDataset(createDto, userId);
+
+        return ResponseEntity.ok(datasetAssembler.toModal(dataset));
     }
 
     @GetMapping("/{datasetId}")
-    public ResponseEntity<DatasetDto> getDataset(@PathVariable long datasetId,
-                                                 @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetDto> getDataset(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         Dataset dataset = datasetService.findById(datasetId, userId);
 
         return ResponseEntity.ok(datasetAssembler.toModal(dataset));
     }
 
     @GetMapping(value = "/list")
-    public ResponseEntity<PagedModel<DatasetDto>> listDatasets(@RequestHeader("X-User-Id") long userId,
-                                                               @PageableDefault Pageable pageable) {
+    public ResponseEntity<PagedModel<DatasetDto>> listDatasets(
+            @RequestHeader("X-User-Id") long userId,
+            @PageableDefault Pageable pageable
+    ) {
         Page<Dataset> datasets = datasetService.listDatasets(userId, pageable);
 
         return ResponseEntity.ok(datasetAssembler.toPagedModel(datasets));
     }
 
     @PutMapping("/{datasetId}")
-    public ResponseEntity<DatasetDto> updateDataset(@PathVariable long datasetId,
-                                                    @RequestBody DatasetUpdateDto dataset,
-                                                    @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetDto> updateDataset(
+            @PathVariable long datasetId,
+            @RequestBody DatasetUpdateDto dataset,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         Dataset updated = datasetService.update(datasetId, dataset, userId);
 
         return ResponseEntity.ok(datasetAssembler.toModal(updated));
     }
 
     @DeleteMapping("/{datasetId}")
-    public ResponseEntity<DatasetDto> deleteDataset(@PathVariable long datasetId,
-                                                    @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetDto> deleteDataset(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         return ResponseEntity.ok(datasetAssembler.toModal(datasetService.deleteDataset(datasetId, userId)));
     }
 
     @PostMapping(value = "/upload", consumes = {"application/zip"})
-    public ResponseEntity<DatasetUploadDto> uploadDataset(HttpServletRequest request,
-                                                          @RequestHeader(value = "X-Dataset-Name") String datasetName,
-                                                          @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetUploadDto> uploadDataset(
+            HttpServletRequest request,
+            @RequestHeader(value = "X-Dataset-Name") String datasetName,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         try (InputStream inputStream = request.getInputStream()) {
             ArchiveType archiveType = ArchiveType.valueOfType(request.getContentType());
             Dataset dataset = datasetService.uploadDataset(archiveType, inputStream, datasetName, userId);
@@ -101,10 +119,12 @@ public class DatasetController {
     }
 
     @GetMapping("/{datasetId}/download")
-    public void downloadDataset(@PathVariable long datasetId,
-                                @PathParam("archiveType") ArchiveType archiveType,
-                                @RequestHeader("X-User-Id") long userId,
-                                HttpServletResponse response) {
-        datasetService.downloadDataset(datasetId,  archiveType, response, userId);
+    public void downloadDataset(
+            @PathVariable long datasetId,
+            @PathParam("archiveType") ArchiveType archiveType,
+            @RequestHeader("X-User-Id") long userId,
+            HttpServletResponse response
+    ) {
+        datasetService.downloadDataset(datasetId, archiveType, response, userId);
     }
 }

@@ -36,10 +36,17 @@ public class PermissionAssembler implements RepresentationModelAssembler<Permiss
 
         model.add(
                 linkTo(
-                        methodOn(PermissionController.class).getPermission(entity.getDataset().getId(), entity.getId(), -1))
+                        methodOn(PermissionController.class).getPermission(
+                                entity.getDataset().getId(),
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getDataset().getId(),
+                                -1
+                        ))
                         .withRel("dataset")
         );
 

@@ -66,7 +66,8 @@ public class ZipArchiveService implements IArchiveService {
                             fileName,
                             entry.getLastModifiedTime().toInstant(),
                             entry.getLastModifiedTime().toInstant(),
-                            dataGroup);
+                            dataGroup
+                    );
 
                     dataGroup.addDataFile(dataFile);
                 }

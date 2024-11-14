@@ -56,7 +56,8 @@ public class StorageService implements IStorageService {
                         .pathSegment("upload")
                         .toUriString(),
                 httpEntity,
-                String.class);
+                String.class
+        );
     }
 
     @Override
@@ -98,7 +99,10 @@ public class StorageService implements IStorageService {
             if (contentType != null) {
                 response.setContentType(contentType.toString());
             }
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, clientHttpResponse.getHeaders().getContentDisposition().toString());
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    clientHttpResponse.getHeaders().getContentDisposition().toString()
+            );
 
             try (InputStream inputStream = clientHttpResponse.getBody();
                  OutputStream outputStream = response.getOutputStream()) {
