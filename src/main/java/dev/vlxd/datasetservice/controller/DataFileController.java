@@ -105,4 +105,16 @@ public class DataFileController {
             throw new RuntimeException("Failed to process file input stream", e);
         }
     }
+
+    @DeleteMapping("/{dataFileId}")
+    public ResponseEntity<DataFileDto> deleteDataFile(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @PathVariable long dataFileId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
+        DataFile dataFile = dataFileService.deleteDataFile(datasetId, dataFileId, userId);
+
+        return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
+    }
 }

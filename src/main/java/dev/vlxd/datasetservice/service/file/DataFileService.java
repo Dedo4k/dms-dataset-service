@@ -15,10 +15,7 @@
 
 package dev.vlxd.datasetservice.service.file;
 
-import dev.vlxd.datasetservice.exception.DataFileAlreadyExistsException;
-import dev.vlxd.datasetservice.exception.DataFileNotFoundException;
-import dev.vlxd.datasetservice.exception.FilenameWithoutExtensionException;
-import dev.vlxd.datasetservice.exception.PermissionDeniedException;
+import dev.vlxd.datasetservice.exception.*;
 import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.repository.DataFileRepository;
@@ -180,5 +177,36 @@ public class DataFileService implements IDataFileService {
                     response.getStatusCode()
             ));
         }
+    }
+
+    @Override
+    public DataFile deleteDataFile(long datasetId, long dataFileId, long userId) {
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.DELETE)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to delete data file with id = %d",
+                    userId,
+                    Permissions.DELETE,
+                    dataFileId
+            ));
+        }
+
+        DataFile dataFile = getDataFile(datasetId, dataFileId, userId);
+
+        try {
+            dataFileRepository.delete(dataFile);
+        } catch (Exception e) {
+            throw new DataFileDeleteException(String.format(
+                    "Failed to delete data file with id = %d",
+                    dataFile.getId()
+            ), e);
+        }
+
+        ResponseEntity<Boolean> response = storageService.delete(dataFile.getFileId());
+
+        if (!HttpStatus.OK.equals(response.getStatusCode()) || Boolean.FALSE.equals(response.getBody())) {
+            throw new DataFileDeleteException(String.format("Failed to delete data file with id = %d", dataFile.getId()));
+        }
+
+        return dataFile;
     }
 }

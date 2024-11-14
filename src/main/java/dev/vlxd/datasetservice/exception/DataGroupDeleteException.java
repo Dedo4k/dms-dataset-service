@@ -13,20 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.group;
+package dev.vlxd.datasetservice.exception;
 
-import dev.vlxd.datasetservice.model.DataGroup;
-import dev.vlxd.datasetservice.model.dto.DataGroupCreateDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+public class DataGroupDeleteException extends RuntimeException {
 
-public interface IDataGroupService {
+    public DataGroupDeleteException(String message) {
+        super(message);
+    }
 
-    DataGroup createGroup(long datasetId, DataGroupCreateDto createDto, long userId);
-
-    DataGroup getGroup(long datasetId, long groupId, long userId);
-
-    Page<DataGroup> listGroups(long datasetId, long userId, Pageable pageable);
-
-    DataGroup deleteGroup(long datasetId, long groupId, long userId);
+    public DataGroupDeleteException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

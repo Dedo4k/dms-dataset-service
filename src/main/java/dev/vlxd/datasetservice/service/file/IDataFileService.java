@@ -32,4 +32,6 @@ public interface IDataFileService {
     ResponseEntity<Resource> getResource(long datasetId, long dataFileId, long userId);
 
     DataFile updateDataFile(long datasetId, long dataFileId, InputStream inputStream, long userId);
+
+    DataFile deleteDataFile(long datasetId, long dataFileId, long userId);
 }
