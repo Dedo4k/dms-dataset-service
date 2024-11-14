@@ -31,5 +31,5 @@ public interface DataGroupRepository extends JpaRepository<DataGroup, Long> {
             "FROM data_group dg " +
             "WHERE dg.name = :name " +
             "AND dg.dataset.id = :datasetId")
-    boolean existsDataGroupByName(long datasetId, String name);
+    boolean existsByName(long datasetId, String name);
 }

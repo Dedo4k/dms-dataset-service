@@ -44,6 +44,29 @@ public class DataFileController {
         this.dataFileAssembler = dataFileAssembler;
     }
 
+    @PostMapping
+    public ResponseEntity<DataFileDto> createDataFile(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @RequestHeader("X-User-Id") long userId,
+            @RequestPart String filename,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        if (file == null) {
+            DataFile dataFile = dataFileService.createDataFile(datasetId, groupId, filename, userId);
+
+            return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
+        } else {
+            try (InputStream inputStream = file.getInputStream()) {
+                DataFile dataFile = dataFileService.createDataFile(datasetId, groupId, filename, inputStream, userId);
+
+                return ResponseEntity.ok(dataFileAssembler.toModel(dataFile));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to process file input stream", e);
+            }
+        }
+    }
+
     @GetMapping("/{dataFileId}")
     public ResponseEntity<DataFileDto> getDataFile(
             @PathVariable long datasetId,

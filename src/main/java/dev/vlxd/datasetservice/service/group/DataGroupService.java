@@ -55,7 +55,7 @@ public class DataGroupService implements IDataGroupService {
             ));
         }
 
-        if (dataGroupRepository.existsDataGroupByName(datasetId, createDto.name)) {
+        if (dataGroupRepository.existsByName(datasetId, createDto.name)) {
             throw new DataGroupNameIsTakenException("Data group name is taken");
         }
 

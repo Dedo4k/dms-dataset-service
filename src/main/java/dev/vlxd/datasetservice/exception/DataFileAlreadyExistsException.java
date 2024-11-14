@@ -13,14 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.repository;
+package dev.vlxd.datasetservice.exception;
 
-import dev.vlxd.datasetservice.model.DataFile;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+public class DataFileAlreadyExistsException extends RuntimeException {
 
-@Repository
-public interface DataFileRepository extends JpaRepository<DataFile, Long> {
+    public DataFileAlreadyExistsException(String message) {
+        super(message);
+    }
 
-    boolean existsByFileNameAndDataGroupId(String filename, long groupId);
+    public DataFileAlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
