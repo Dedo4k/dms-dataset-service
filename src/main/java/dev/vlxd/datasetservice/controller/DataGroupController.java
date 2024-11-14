@@ -17,6 +17,7 @@ package dev.vlxd.datasetservice.controller;
 
 import dev.vlxd.datasetservice.model.DataGroup;
 import dev.vlxd.datasetservice.model.assembler.DataGroupAssemblerService;
+import dev.vlxd.datasetservice.model.dto.DataGroupCreateDto;
 import dev.vlxd.datasetservice.model.dto.DataGroupDto;
 import dev.vlxd.datasetservice.service.group.IDataGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,25 +36,42 @@ public class DataGroupController {
     private final DataGroupAssemblerService dataGroupAssembler;
 
     @Autowired
-    public DataGroupController(IDataGroupService dataGroupService,
-                               DataGroupAssemblerService dataGroupAssembler) {
+    public DataGroupController(
+            IDataGroupService dataGroupService,
+            DataGroupAssemblerService dataGroupAssembler
+    ) {
         this.dataGroupService = dataGroupService;
         this.dataGroupAssembler = dataGroupAssembler;
     }
 
+    @PostMapping
+    public ResponseEntity<DataGroupDto> createGroup(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId,
+            @RequestBody DataGroupCreateDto createDto
+    ) {
+        DataGroup group = dataGroupService.createGroup(datasetId, createDto, userId);
+
+        return ResponseEntity.ok(dataGroupAssembler.toModel(group));
+    }
+
     @GetMapping("/{groupId}")
-    public ResponseEntity<DataGroupDto> getGroup(@PathVariable long datasetId,
-                                                 @PathVariable long groupId,
-                                                 @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DataGroupDto> getGroup(
+            @PathVariable long datasetId,
+            @PathVariable long groupId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         DataGroup group = dataGroupService.getGroup(datasetId, groupId, userId);
 
         return ResponseEntity.ok(dataGroupAssembler.toModel(group));
     }
 
     @GetMapping
-    public ResponseEntity<PagedModel<DataGroupDto>> listGroups(@PathVariable long datasetId,
-                                                               @RequestHeader("X-User-Id") long userId,
-                                                               @PageableDefault Pageable pageable) {
+    public ResponseEntity<PagedModel<DataGroupDto>> listGroups(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId,
+            @PageableDefault Pageable pageable
+    ) {
         Page<DataGroup> groups = dataGroupService.listGroups(datasetId, userId, pageable);
 
         return ResponseEntity.ok(dataGroupAssembler.toPagedModel(groups));

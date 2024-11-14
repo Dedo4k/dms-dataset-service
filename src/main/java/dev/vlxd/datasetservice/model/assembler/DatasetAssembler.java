@@ -41,22 +41,35 @@ public class DatasetAssembler implements RepresentationModelAssembler<Dataset, D
 
         model.add(
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetConfigController.class).getConfig(entity.getId(), -1))
+                        methodOn(DatasetConfigController.class).getConfig(
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("config"),
                 linkTo(
-                        methodOn(DataGroupController.class).listGroups(entity.getId(), -1, null))
+                        methodOn(DataGroupController.class).listGroups(
+                                entity.getId(),
+                                -1,
+                                null
+                        ))
                         .withRel("groups"),
                 linkTo(
-                        methodOn(PermissionController.class).listPermissions(entity.getId(), -1))
+                        methodOn(PermissionController.class).listPermissions(
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("permissions"),
                 Link.of(ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/v1/datasets/{id}/download")
-                        .queryParam("archiveType", ArchiveType.ZIP)
-                        .buildAndExpand(entity.getId())
-                        .toUriString())
+                                .path("/v1/datasets/{id}/download")
+                                .queryParam("archiveType", ArchiveType.ZIP)
+                                .buildAndExpand(entity.getId())
+                                .toUriString())
                         .withRel("download")
         );
 

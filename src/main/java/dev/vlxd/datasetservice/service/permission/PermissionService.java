@@ -15,12 +15,12 @@
 
 package dev.vlxd.datasetservice.service.permission;
 
-import dev.vlxd.datasetservice.exception.DatasetNotFoundException;
 import dev.vlxd.datasetservice.exception.PermissionNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.Permission;
 import dev.vlxd.datasetservice.model.dto.PermissionUpdateDto;
-import dev.vlxd.datasetservice.repository.DatasetRepository;
+import dev.vlxd.datasetservice.repository.PermissionRepository;
+import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,31 +31,30 @@ import java.util.List;
 @Transactional
 public class PermissionService implements IPermissionService {
 
-    private final DatasetRepository datasetRepository;
+    private final PermissionRepository permissionRepository;
+    private final IDatasetService datasetService;
 
     @Autowired
-    public PermissionService(DatasetRepository datasetRepository) {
-        this.datasetRepository = datasetRepository;
+    public PermissionService(PermissionRepository permissionRepository, IDatasetService datasetService) {
+        this.permissionRepository = permissionRepository;
+        this.datasetService = datasetService;
     }
 
     @Override
     public Permission getPermission(long datasetId, long permissionId, long ownerId) {
-        Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+        datasetService.findByIdAndOwnerId(datasetId, ownerId);
 
-        return dataset.getPermissions().stream()
-                .filter(p -> p.getId() == permissionId)
-                .findFirst()
+        return permissionRepository.findById(permissionId)
                 .orElseThrow(() ->
-                        new PermissionNotFoundException(String.format("Permission with id = %d not found", permissionId)));
+                                     new PermissionNotFoundException(String.format(
+                                             "Permission with id = %d not found",
+                                             permissionId
+                                     )));
     }
 
     @Override
     public List<Permission> listPermissions(long datasetId, long ownerId) {
-        Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+        Dataset dataset = datasetService.findByIdAndOwnerId(datasetId, ownerId);
 
         return dataset.getPermissions();
     }
@@ -78,7 +77,7 @@ public class PermissionService implements IPermissionService {
             }
         });
 
-        datasetRepository.save(permission.getDataset());
+        permissionRepository.save(permission);
 
         return permission;
     }

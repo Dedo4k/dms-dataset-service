@@ -15,12 +15,13 @@
 
 package dev.vlxd.datasetservice.service.file;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DataFileNotFoundException;
 import dev.vlxd.datasetservice.exception.PermissionDeniedException;
 import dev.vlxd.datasetservice.model.DataFile;
 import dev.vlxd.datasetservice.repository.DataFileRepository;
+import dev.vlxd.datasetservice.service.dataset.IDatasetService;
 import dev.vlxd.datasetservice.service.storage.IStorageService;
+import dev.vlxd.datasetservice.util.Permissions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -30,58 +31,68 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Transactional
 public class DataFileService implements IDataFileService {
 
     private final DataFileRepository dataFileRepository;
+    private final IDatasetService datasetService;
     private final IStorageService storageService;
 
-    private final List<PermissionType> createPermissions = List.of(PermissionType.CREATE);
-    private final List<PermissionType> readPermissions = List.of(PermissionType.READ);
-    private final List<PermissionType> updatePermissions = List.of(PermissionType.READ, PermissionType.UPDATE);
-    private final List<PermissionType> deletePermissions = List.of(PermissionType.READ, PermissionType.DELETE);
-
     @Autowired
-    public DataFileService(DataFileRepository dataFileRepository,
-                           IStorageService storageService) {
+    public DataFileService(
+            DataFileRepository dataFileRepository, IDatasetService datasetService,
+            IStorageService storageService
+    ) {
         this.dataFileRepository = dataFileRepository;
+        this.datasetService = datasetService;
         this.storageService = storageService;
     }
 
     @Override
-    public DataFile getDataFile(long datasetId, long groupId, long dataFileId, long userId) {
-        return dataFileRepository.findDataFile(
-                        datasetId,
-                        groupId,
-                        dataFileId,
-                        userId,
-                        readPermissions,
-                        readPermissions.size())
+    public DataFile getDataFile(long datasetId, long dataFileId, long userId) {
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.READ)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to get data file with id = %d",
+                    userId,
+                    Permissions.READ,
+                    dataFileId
+            ));
+        }
+
+        return dataFileRepository.findById(dataFileId)
                 .orElseThrow(() ->
-                        new DataFileNotFoundException(String.format("Data file with id = %d groupId = %d datasetId = %d not found or you don't have %s permission", dataFileId, groupId, datasetId, readPermissions)));
+                                     new DataFileNotFoundException(String.format(
+                                             "Data file with id = %d not found",
+                                             dataFileId
+                                     )));
     }
 
     @Override
-    public ResponseEntity<Resource> getResource(long datasetId, long groupId, long dataFileId, long userId) {
-        DataFile dataFile = getDataFile(datasetId, groupId, dataFileId, userId);
+    public ResponseEntity<Resource> getResource(long datasetId, long dataFileId, long userId) {
+        DataFile dataFile = getDataFile(datasetId, dataFileId, userId);
 
         return storageService.getResource(dataFile.getFileId());
     }
 
     @Override
-    public DataFile updateDataFile(long datasetId, long groupId, long dataFileId, InputStream inputStream, long userId) {
-        DataFile dataFile = dataFileRepository.findDataFile(
-                        datasetId,
-                        groupId,
-                        dataFileId,
-                        userId,
-                        updatePermissions,
-                        updatePermissions.size())
-                .orElseThrow(() ->
-                        new PermissionDeniedException(String.format("User with id = %d hasn't got %s permissions to data file", userId, updatePermissions)));
+    public DataFile updateDataFile(
+            long datasetId,
+            long dataFileId,
+            InputStream inputStream,
+            long userId
+    ) {
+        DataFile dataFile = getDataFile(datasetId, dataFileId, userId);
+
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.UPDATE)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to update data file with id = %d",
+                    userId,
+                    Permissions.UPDATE,
+                    dataFileId
+            ));
+        }
 
         ResponseEntity<String> response = storageService.upload(inputStream, dataFile.getFileId());
 
@@ -92,7 +103,10 @@ public class DataFileService implements IDataFileService {
 
             return dataFile;
         } else {
-            throw new RuntimeException(String.format("Failed to update data file. Status code = %s", response.getStatusCode()));
+            throw new RuntimeException(String.format(
+                    "Failed to update data file. Status code = %s",
+                    response.getStatusCode()
+            ));
         }
     }
 }

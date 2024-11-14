@@ -16,10 +16,13 @@
 package dev.vlxd.datasetservice.service.group;
 
 import dev.vlxd.datasetservice.model.DataGroup;
+import dev.vlxd.datasetservice.model.dto.DataGroupCreateDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface IDataGroupService {
+
+    DataGroup createGroup(long datasetId, DataGroupCreateDto createDto, long userId);
 
     DataGroup getGroup(long datasetId, long groupId, long userId);
 

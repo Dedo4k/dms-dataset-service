@@ -35,7 +35,10 @@ public class DatasetUploadAssembler implements RepresentationModelAssembler<Data
 
         model.add(
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("details")
         );
 

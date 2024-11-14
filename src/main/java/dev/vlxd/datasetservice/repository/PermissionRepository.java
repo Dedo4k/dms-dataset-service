@@ -13,19 +13,12 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.file;
+package dev.vlxd.datasetservice.repository;
 
-import dev.vlxd.datasetservice.model.DataFile;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+import dev.vlxd.datasetservice.model.Permission;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.io.InputStream;
-
-public interface IDataFileService {
-
-    DataFile getDataFile(long datasetId, long dataFileId, long userId);
-
-    ResponseEntity<Resource> getResource(long datasetId, long dataFileId, long userId);
-
-    DataFile updateDataFile(long datasetId, long dataFileId, InputStream inputStream, long userId);
+@Repository
+public interface PermissionRepository extends JpaRepository<Permission, Long> {
 }

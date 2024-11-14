@@ -41,27 +41,33 @@ public class PermissionController {
     }
 
     @GetMapping("/{permissionId}")
-    public ResponseEntity<PermissionDto> getPermission(@PathVariable long datasetId,
-                                       @PathVariable long permissionId,
-                                       @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<PermissionDto> getPermission(
+            @PathVariable long datasetId,
+            @PathVariable long permissionId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         Permission permission = permissionService.getPermission(datasetId, permissionId, userId);
 
         return ResponseEntity.ok(permissionAssembler.toModel(permission));
     }
 
     @GetMapping
-    public ResponseEntity<CollectionModel<PermissionDto>> listPermissions(@PathVariable long datasetId,
-                                                                          @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<CollectionModel<PermissionDto>> listPermissions(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         List<Permission> permissions = permissionService.listPermissions(datasetId, userId);
 
         return ResponseEntity.ok(permissionAssembler.toCollectionModel(permissions));
     }
 
     @PutMapping("/{permissionId}")
-    public ResponseEntity<PermissionDto> updatePermission(@PathVariable long datasetId,
-                                                          @PathVariable long permissionId,
-                                                          @RequestBody PermissionUpdateDto updateDto,
-                                                          @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<PermissionDto> updatePermission(
+            @PathVariable long datasetId,
+            @PathVariable long permissionId,
+            @RequestBody PermissionUpdateDto updateDto,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         Permission permission = permissionService.updatePermission(datasetId, permissionId, updateDto, userId);
 
         return ResponseEntity.ok(permissionAssembler.toModel(permission));

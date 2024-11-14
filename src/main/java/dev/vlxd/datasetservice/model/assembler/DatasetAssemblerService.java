@@ -32,8 +32,10 @@ public class DatasetAssemblerService {
     private final PagedResourcesAssembler<Dataset> pagedAssembler;
 
     @Autowired
-    public DatasetAssemblerService(DatasetAssembler datasetAssembler,
-                                   DatasetUploadAssembler uploadAssembler) {
+    public DatasetAssemblerService(
+            DatasetAssembler datasetAssembler,
+            DatasetUploadAssembler uploadAssembler
+    ) {
         this.datasetAssembler = datasetAssembler;
         this.uploadAssembler = uploadAssembler;
         this.pagedAssembler = new PagedResourcesAssembler<>(null, null);

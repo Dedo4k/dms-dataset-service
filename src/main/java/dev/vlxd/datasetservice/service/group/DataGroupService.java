@@ -15,10 +15,15 @@
 
 package dev.vlxd.datasetservice.service.group;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
+import dev.vlxd.datasetservice.exception.DataGroupNameIsTakenException;
 import dev.vlxd.datasetservice.exception.DataGroupNotFoundException;
+import dev.vlxd.datasetservice.exception.PermissionDeniedException;
 import dev.vlxd.datasetservice.model.DataGroup;
+import dev.vlxd.datasetservice.model.Dataset;
+import dev.vlxd.datasetservice.model.dto.DataGroupCreateDto;
 import dev.vlxd.datasetservice.repository.DataGroupRepository;
+import dev.vlxd.datasetservice.service.dataset.IDatasetService;
+import dev.vlxd.datasetservice.util.Permissions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,21 +35,70 @@ import org.springframework.stereotype.Service;
 public class DataGroupService implements IDataGroupService {
 
     private final DataGroupRepository dataGroupRepository;
+    private final IDatasetService datasetService;
 
     @Autowired
-    public DataGroupService(DataGroupRepository dataGroupRepository) {
+    public DataGroupService(DataGroupRepository dataGroupRepository, IDatasetService datasetService) {
         this.dataGroupRepository = dataGroupRepository;
+        this.datasetService = datasetService;
+    }
+
+    @Override
+    public DataGroup createGroup(long datasetId, DataGroupCreateDto createDto, long userId) {
+        Dataset dataset = datasetService.findById(datasetId, userId);
+
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.CREATE)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to create data group",
+                    userId,
+                    Permissions.CREATE
+            ));
+        }
+
+        if (dataGroupRepository.existsDataGroupByName(datasetId, createDto.name)) {
+            throw new DataGroupNameIsTakenException("Data group name is taken");
+        }
+
+        DataGroup group = new DataGroup();
+
+        group.setName(createDto.name);
+        group.setDataset(dataset);
+
+        dataGroupRepository.save(group);
+
+        return group;
     }
 
     @Override
     public DataGroup getGroup(long datasetId, long groupId, long userId) {
-        return dataGroupRepository.findDataGroup(datasetId, groupId, userId, PermissionType.READ)
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.READ)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to get data group with id = %d",
+                    userId,
+                    Permissions.READ,
+                    groupId
+            ));
+        }
+
+        return dataGroupRepository.findById(groupId)
                 .orElseThrow(() ->
-                        new DataGroupNotFoundException(String.format("Data group with id = %d and datasetId = %d not found or you don't have READ permission", groupId, datasetId)));
+                                     new DataGroupNotFoundException(String.format(
+                                             "Data group with id = %d not found",
+                                             groupId
+                                     )));
     }
 
     @Override
     public Page<DataGroup> listGroups(long datasetId, long userId, Pageable pageable) {
-        return dataGroupRepository.findDataGroups(datasetId, userId, PermissionType.READ, pageable);
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.READ)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to get data groups of dataset with id = %d",
+                    userId,
+                    Permissions.READ,
+                    datasetId
+            ));
+        }
+
+        return dataGroupRepository.findAllByDatasetId(datasetId, pageable);
     }
 }

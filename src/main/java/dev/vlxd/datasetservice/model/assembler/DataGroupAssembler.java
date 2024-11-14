@@ -42,15 +42,22 @@ public class DataGroupAssembler implements RepresentationModelAssembler<DataGrou
     public @NonNull DataGroupDto toModel(@NonNull DataGroup entity) {
         DataGroupDto model = new DataGroupDto(entity);
         model.files.addAll(entity.getFiles().stream()
-                .map(dataFileAssembler::toModel)
-                .toList());
+                                   .map(dataFileAssembler::toModel)
+                                   .toList());
 
         model.add(
                 linkTo(
-                        methodOn(DataGroupController.class).getGroup(entity.getDataset().getId(), entity.getId(), -1))
+                        methodOn(DataGroupController.class).getGroup(
+                                entity.getDataset().getId(),
+                                entity.getId(),
+                                -1
+                        ))
                         .withRel("self"),
                 linkTo(
-                        methodOn(DatasetController.class).getDataset(entity.getDataset().getId(), -1))
+                        methodOn(DatasetController.class).getDataset(
+                                entity.getDataset().getId(),
+                                -1
+                        ))
                         .withRel("dataset")
         );
 

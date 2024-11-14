@@ -15,7 +15,6 @@
 
 package dev.vlxd.datasetservice.repository;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.model.DatasetConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,11 +31,5 @@ public interface DatasetConfigRepository extends JpaRepository<DatasetConfig, Lo
             "AND dc.dataset.ownerId = :ownerId")
     Optional<DatasetConfig> findDatasetConfigAsOwner(long datasetId, long ownerId);
 
-    @Query("SELECT dc " +
-            "FROM dataset_config dc " +
-            "JOIN permission p ON dc.dataset.id = p.dataset.id " +
-            "WHERE dc.dataset.id = :datasetId " +
-            "AND :userId MEMBER OF p.userIds " +
-            "AND p.type = :permissionType")
-    Optional<DatasetConfig> findDatasetConfig(long datasetId, long userId, PermissionType permissionType);
+    Optional<DatasetConfig> findDatasetConfigByDatasetId(long datasetId);
 }

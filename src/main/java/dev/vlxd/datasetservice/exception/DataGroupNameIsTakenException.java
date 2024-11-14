@@ -13,19 +13,15 @@
  * For any permissions not covered by the license or any inquiries about usage, please contact: [lailo.vlad@gmail.com]
  */
 
-package dev.vlxd.datasetservice.service.file;
+package dev.vlxd.datasetservice.exception;
 
-import dev.vlxd.datasetservice.model.DataFile;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
+public class DataGroupNameIsTakenException extends RuntimeException {
 
-import java.io.InputStream;
+    public DataGroupNameIsTakenException(String message) {
+        super(message);
+    }
 
-public interface IDataFileService {
-
-    DataFile getDataFile(long datasetId, long dataFileId, long userId);
-
-    ResponseEntity<Resource> getResource(long datasetId, long dataFileId, long userId);
-
-    DataFile updateDataFile(long datasetId, long dataFileId, InputStream inputStream, long userId);
+    public DataGroupNameIsTakenException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

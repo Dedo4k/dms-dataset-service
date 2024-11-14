@@ -15,7 +15,6 @@
 
 package dev.vlxd.datasetservice.service.config;
 
-import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DatasetConfigAlreadyExistsException;
 import dev.vlxd.datasetservice.exception.DatasetConfigNotFoundException;
 import dev.vlxd.datasetservice.model.Dataset;
@@ -39,18 +38,25 @@ public class DatasetConfigService implements IDatasetConfigService {
     private final IDatasetService datasetService;
 
     @Autowired
-    public DatasetConfigService(DatasetConfigRepository configRepository,
-                                IDatasetService datasetService) {
+    public DatasetConfigService(
+            DatasetConfigRepository configRepository,
+            IDatasetService datasetService
+    ) {
         this.configRepository = configRepository;
         this.datasetService = datasetService;
     }
 
     @Override
     public DatasetConfig getConfig(long datasetId, long userId) {
+        Dataset dataset = datasetService.findById(datasetId, userId);
+
         return configRepository
-                .findDatasetConfig(datasetId, userId, PermissionType.READ)
+                .findDatasetConfigByDatasetId(dataset.getId())
                 .orElseThrow(() ->
-                        new DatasetConfigNotFoundException(String.format("Dataset with id = %d doesn't have config or or you don't have READ permission", datasetId)));
+                                     new DatasetConfigNotFoundException(String.format(
+                                             "Dataset with id = %d doesn't have config",
+                                             datasetId
+                                     )));
     }
 
     @Override
@@ -58,7 +64,10 @@ public class DatasetConfigService implements IDatasetConfigService {
         Dataset dataset = datasetService.findByIdAndOwnerId(datasetId, ownerId);
 
         if (!ObjectUtils.isEmpty(dataset.getConfig())) {
-            throw new DatasetConfigAlreadyExistsException(String.format("Dataset with id = %d already has config", datasetId));
+            throw new DatasetConfigAlreadyExistsException(String.format(
+                    "Dataset with id = %d already has config",
+                    datasetId
+            ));
         }
 
         DatasetConfig config = new DatasetConfig();
@@ -80,7 +89,10 @@ public class DatasetConfigService implements IDatasetConfigService {
     public DatasetConfig update(long datasetId, DatasetConfigUpdateDto updateDto, long ownerId) {
         DatasetConfig config = configRepository.findDatasetConfigAsOwner(datasetId, ownerId)
                 .orElseThrow(() ->
-                        new DatasetConfigNotFoundException(String.format("Dataset with id = %d doesn't have config or you aren't an owner of the dataset", datasetId)));
+                                     new DatasetConfigNotFoundException(String.format(
+                                             "Dataset with id = %d doesn't have config or you aren't an owner of the dataset",
+                                             datasetId
+                                     )));
 
         config.setClasses(updateDto.classes);
         config.setUseClasses(updateDto.useClasses);

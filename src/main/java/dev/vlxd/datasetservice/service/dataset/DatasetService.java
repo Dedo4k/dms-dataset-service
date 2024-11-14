@@ -20,12 +20,15 @@ import dev.vlxd.datasetservice.constant.PermissionType;
 import dev.vlxd.datasetservice.exception.DatasetDeleteException;
 import dev.vlxd.datasetservice.exception.DatasetNameIsTakenException;
 import dev.vlxd.datasetservice.exception.DatasetNotFoundException;
+import dev.vlxd.datasetservice.exception.PermissionDeniedException;
 import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.Permission;
+import dev.vlxd.datasetservice.model.dto.DatasetCreateDto;
 import dev.vlxd.datasetservice.model.dto.DatasetUpdateDto;
 import dev.vlxd.datasetservice.repository.DatasetRepository;
 import dev.vlxd.datasetservice.service.archive.ArchiveManagerService;
 import dev.vlxd.datasetservice.service.storage.IStorageService;
+import dev.vlxd.datasetservice.util.Permissions;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -38,6 +41,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 @Transactional
@@ -47,9 +51,9 @@ public class DatasetService implements IDatasetService {
     private final DatasetRepository datasetRepository;
     private final IStorageService storageService;
 
-    public DatasetService(ArchiveManagerService archiveService,
-                          DatasetRepository datasetRepository,
-                          IStorageService storageService) {
+    public DatasetService(
+            ArchiveManagerService archiveService, DatasetRepository datasetRepository, IStorageService storageService
+    ) {
         this.archiveService = archiveService;
         this.datasetRepository = datasetRepository;
         this.storageService = storageService;
@@ -62,24 +66,70 @@ public class DatasetService implements IDatasetService {
 
     @Override
     public Dataset findById(long datasetId, long userId) {
-        return datasetRepository.findDataset(datasetId, userId, PermissionType.READ)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you don't have READ permission", datasetId)));
+        if (!checkUserPermissions(
+                datasetId,
+                userId,
+                Permissions.READ
+        )) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to get dataset with id = %d",
+                    userId,
+                    Permissions.READ,
+                    datasetId
+            ));
+        }
+
+        return datasetRepository.findDatasetById(datasetId)
+                .orElseThrow(() -> new DatasetNotFoundException(String.format(
+                        "Dataset with id = %d not found",
+                        datasetId
+                )));
     }
 
     @Override
     public Dataset findByIdAndOwnerId(long datasetId, long ownerId) {
-        return datasetRepository.findDatasetsByIdAndOwnerId(datasetId, ownerId)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+        return datasetRepository.findDatasetByIdAndOwnerId(datasetId, ownerId)
+                .orElseThrow(() -> new DatasetNotFoundException(String.format(
+                        "Dataset with id = %d not found or you aren't an owner of the dataset",
+                        datasetId
+                )));
+    }
+
+    @Override
+    public Dataset createDataset(DatasetCreateDto createDto, long userId) {
+
+        if (datasetRepository.existsByNameAndOwnerId(createDto.name, userId)) {
+            throw new DatasetNameIsTakenException("Dataset name is taken");
+        }
+
+        Dataset dataset = new Dataset();
+
+        dataset.setName(createDto.name);
+        dataset.setAlias(createDto.name);
+        dataset.setDescription(createDto.description);
+        dataset.setOwnerId(userId);
+        dataset.setCreationDate(Instant.now());
+        dataset.setModificationDate(Instant.now());
+        dataset.setPermissions(Arrays.stream(PermissionType.values())
+                                       .map(type -> new Permission(
+                                               type,
+                                               dataset,
+                                               Collections.singletonList(userId)
+                                       ))
+                                       .toList());
+
+        datasetRepository.save(dataset);
+
+        return dataset;
     }
 
     @Override
     public Dataset update(long datasetId, DatasetUpdateDto dataset, long userId) {
-        Dataset datasetToUpdate = datasetRepository
-                .findDatasetsByIdAndOwnerId(datasetId, userId)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+        Dataset datasetToUpdate = datasetRepository.findDatasetByIdAndOwnerId(datasetId, userId)
+                .orElseThrow(() -> new DatasetNotFoundException(String.format(
+                        "Dataset with id = %d not found or you aren't an owner of the dataset",
+                        datasetId
+                )));
 
         datasetToUpdate.setAlias(dataset.name);
         datasetToUpdate.setDescription(dataset.description);
@@ -92,9 +142,7 @@ public class DatasetService implements IDatasetService {
 
     @Override
     public Dataset deleteDataset(long datasetId, long userId) {
-        Dataset dataset = datasetRepository.findDatasetsByIdAndOwnerId(datasetId, userId)
-                .orElseThrow(() ->
-                        new DatasetNotFoundException(String.format("Dataset with id = %d not found or you aren't an owner of the dataset", datasetId)));
+        Dataset dataset = findByIdAndOwnerId(datasetId, userId);
 
         try {
             datasetRepository.delete(dataset);
@@ -102,7 +150,11 @@ public class DatasetService implements IDatasetService {
             throw new DatasetDeleteException(String.format("Failed to delete dataset with id = %d", datasetId), e);
         }
 
-        ResponseEntity<Boolean> response = storageService.delete(String.join("/", String.valueOf(dataset.getOwnerId()), dataset.getName()));
+        ResponseEntity<Boolean> response = storageService.delete(String.join(
+                "/",
+                String.valueOf(dataset.getOwnerId()),
+                dataset.getName()
+        ));
 
         if (!HttpStatus.OK.equals(response.getStatusCode()) || Boolean.FALSE.equals(response.getBody())) {
             throw new DatasetDeleteException(String.format("Failed to delete dataset with id = %d", datasetId));
@@ -125,10 +177,13 @@ public class DatasetService implements IDatasetService {
         dataset.setOwnerId(userId);
         dataset.setCreationDate(Instant.now());
         dataset.setModificationDate(Instant.now());
-        dataset.setPermissions(
-                Arrays.stream(PermissionType.values())
-                        .map(type -> new Permission(type, dataset, Collections.singletonList(userId)))
-                        .toList());
+        dataset.setPermissions(Arrays.stream(PermissionType.values())
+                                       .map(type -> new Permission(
+                                               type,
+                                               dataset,
+                                               Collections.singletonList(userId)
+                                       ))
+                                       .toList());
 
         datasetRepository.save(dataset);
 
@@ -139,6 +194,18 @@ public class DatasetService implements IDatasetService {
     public void downloadDataset(long datasetId, ArchiveType archiveType, HttpServletResponse response, long userId) {
         Dataset dataset = findById(datasetId, userId);
 
-        storageService.download( String.join("/", String.valueOf(userId), dataset.getName()), archiveType, response);
+        storageService.download(
+                String.join(
+                        "/",
+                        String.valueOf(userId), dataset.getName()
+                ),
+                archiveType,
+                response
+        );
+    }
+
+    @Override
+    public boolean checkUserPermissions(long datasetId, long userId, List<PermissionType> permissions) {
+        return datasetRepository.checkUserPermissions(datasetId, userId, permissions, permissions.size());
     }
 }

@@ -34,33 +34,41 @@ public class DatasetConfigController {
     private final DatasetConfigAssemblerService configAssembler;
 
     @Autowired
-    public DatasetConfigController(IDatasetConfigService configService,
-                                   DatasetConfigAssemblerService configAssembler) {
+    public DatasetConfigController(
+            IDatasetConfigService configService,
+            DatasetConfigAssemblerService configAssembler
+    ) {
         this.configService = configService;
         this.configAssembler = configAssembler;
     }
 
     @PostMapping
-    public ResponseEntity<DatasetConfigDto> createConfig(@PathVariable long datasetId,
-                                                         @RequestBody DatasetConfigCreateDto createDto,
-                                                         @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetConfigDto> createConfig(
+            @PathVariable long datasetId,
+            @RequestBody DatasetConfigCreateDto createDto,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         DatasetConfig config = configService.create(datasetId, createDto, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(configAssembler.toModel(config));
     }
 
     @GetMapping
-    public ResponseEntity<DatasetConfigDto> getConfig(@PathVariable long datasetId,
-                                                      @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetConfigDto> getConfig(
+            @PathVariable long datasetId,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         DatasetConfig config = configService.getConfig(datasetId, userId);
 
         return ResponseEntity.ok(configAssembler.toModel(config));
     }
 
     @PutMapping
-    public ResponseEntity<DatasetConfigDto> updateConfig(@PathVariable long datasetId,
-                                                         @RequestBody DatasetConfigUpdateDto updateDto,
-                                                         @RequestHeader("X-User-Id") long userId) {
+    public ResponseEntity<DatasetConfigDto> updateConfig(
+            @PathVariable long datasetId,
+            @RequestBody DatasetConfigUpdateDto updateDto,
+            @RequestHeader("X-User-Id") long userId
+    ) {
         DatasetConfig config = configService.update(datasetId, updateDto, userId);
 
         return ResponseEntity.ok(configAssembler.toModel(config));
