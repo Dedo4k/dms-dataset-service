@@ -76,4 +76,13 @@ public class DataGroupController {
 
         return ResponseEntity.ok(dataGroupAssembler.toPagedModel(groups));
     }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<DataGroupDto> deleteGroup(@PathVariable long datasetId,
+                                                    @PathVariable long groupId,
+                                                    @RequestHeader("X-User-Id") long userId) {
+        DataGroup group = dataGroupService.deleteGroup(datasetId, groupId, userId);
+
+        return ResponseEntity.ok(dataGroupAssembler.toModel(group));
+    }
 }

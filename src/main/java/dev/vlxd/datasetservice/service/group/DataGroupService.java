@@ -15,6 +15,7 @@
 
 package dev.vlxd.datasetservice.service.group;
 
+import dev.vlxd.datasetservice.exception.DataGroupDeleteException;
 import dev.vlxd.datasetservice.exception.DataGroupNameIsTakenException;
 import dev.vlxd.datasetservice.exception.DataGroupNotFoundException;
 import dev.vlxd.datasetservice.exception.PermissionDeniedException;
@@ -23,11 +24,14 @@ import dev.vlxd.datasetservice.model.Dataset;
 import dev.vlxd.datasetservice.model.dto.DataGroupCreateDto;
 import dev.vlxd.datasetservice.repository.DataGroupRepository;
 import dev.vlxd.datasetservice.service.dataset.IDatasetService;
+import dev.vlxd.datasetservice.service.storage.IStorageService;
 import dev.vlxd.datasetservice.util.Permissions;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,17 +40,21 @@ public class DataGroupService implements IDataGroupService {
 
     private final DataGroupRepository dataGroupRepository;
     private final IDatasetService datasetService;
+    private final IStorageService storageService;
 
     @Autowired
-    public DataGroupService(DataGroupRepository dataGroupRepository, IDatasetService datasetService) {
+    public DataGroupService(
+            DataGroupRepository dataGroupRepository,
+            IDatasetService datasetService,
+            IStorageService storageService
+    ) {
         this.dataGroupRepository = dataGroupRepository;
         this.datasetService = datasetService;
+        this.storageService = storageService;
     }
 
     @Override
     public DataGroup createGroup(long datasetId, DataGroupCreateDto createDto, long userId) {
-        Dataset dataset = datasetService.findById(datasetId, userId);
-
         if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.CREATE)) {
             throw new PermissionDeniedException(String.format(
                     "User with id = %d hasn't got %s permissions to create data group",
@@ -54,6 +62,8 @@ public class DataGroupService implements IDataGroupService {
                     Permissions.CREATE
             ));
         }
+
+        Dataset dataset = datasetService.findById(datasetId, userId);
 
         if (dataGroupRepository.existsByName(datasetId, createDto.name)) {
             throw new DataGroupNameIsTakenException("Data group name is taken");
@@ -100,5 +110,42 @@ public class DataGroupService implements IDataGroupService {
         }
 
         return dataGroupRepository.findAllByDatasetId(datasetId, pageable);
+    }
+
+    @Override
+    public DataGroup deleteGroup(long datasetId, long groupId, long userId) {
+        if (!datasetService.checkUserPermissions(datasetId, userId, Permissions.DELETE)) {
+            throw new PermissionDeniedException(String.format(
+                    "User with id = %d hasn't got %s permissions to delete data group with id = %d",
+                    userId,
+                    Permissions.DELETE,
+                    datasetId
+            ));
+        }
+
+        DataGroup group = getGroup(datasetId, groupId, userId);
+
+        try {
+            dataGroupRepository.delete(group);
+        } catch (Exception e) {
+            throw new DataGroupDeleteException(
+                    String.format("Failed to delete data group with id = %d", group.getId()),
+                    e
+            );
+        }
+
+        group.getFiles().forEach(dataFile -> {
+            ResponseEntity<Boolean> response = storageService.delete(dataFile.getFileId());
+
+            if (!HttpStatus.OK.equals(response.getStatusCode()) || Boolean.FALSE.equals(response.getBody())) {
+                throw new DataGroupDeleteException(String.format(
+                        "Failed to delete data file with id = %d from data group with id = %d",
+                        dataFile.getId(),
+                        group.getId()
+                ));
+            }
+        });
+
+        return group;
     }
 }
